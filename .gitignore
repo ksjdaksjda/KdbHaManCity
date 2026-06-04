@@ -1,0 +1,23 @@
+# Binary
+*.exe
+*.zip
+*.tar.gz
+
+# Cache
+__pycache__/
+*.pyc
+
+# Runtime
+streamlit.log
+tunnel_url.txt
+data/
+nssm.zip
+
+# IDE
+.vscode/
+.idea/
+*.tmp
+*.log
+
+# Secrets
+.streamlit/secrets.toml

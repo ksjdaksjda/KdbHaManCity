@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>论文智能写作助手</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+:root{--primary:#1a5276;--accent:#2e86c1;--success:#27ae60;--warning:#f39c12;--danger:#e74c3c;--bg:#f0f3f7;--card:#fff;--text:#2c3e50;--border:#dce1e8;--sw:220px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:14px/1.6 'Microsoft YaHei','PingFang SC',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+#login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a3c54,#1a5276,#2e86c1);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
+#login-overlay.hidden{display:none}
+.login-box{background:#fff;padding:40px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center;width:380px}
+.login-box h1{color:var(--primary);margin-bottom:4px;font-size:22px}
+.login-box .sub{color:#888;margin-bottom:16px;font-size:13px}
+.login-box input{width:100%;padding:12px;border:2px solid var(--border);border-radius:8px;font-size:15px;text-align:center;margin:8px 0;outline:none}
+.login-box input:focus{border-color:var(--accent)}
+.login-box button{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:bold;transition:.2s}
+.login-box button:hover{background:#2471a3}
+.login-box .err{color:var(--danger);margin-top:8px;font-size:13px;min-height:20px}
+#sidebar{width:var(--sw);background:linear-gradient(180deg,#1a3c54,#1a5276);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;display:flex;flex-direction:column}
+#sidebar .logo{padding:14px 16px;font-size:16px;font-weight:bold;border-bottom:1px solid rgba(255,255,255,.1);text-align:center}
+#sidebar .net{padding:6px 16px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.05)}
+#sidebar .nav-item{padding:9px 16px;cursor:pointer;font-size:13px;border-left:3px solid transparent;transition:.15s;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:6px;user-select:none}
+#sidebar .nav-item:hover{background:rgba(255,255,255,.06);border-left-color:var(--accent)}
+#sidebar .nav-item.active{background:rgba(255,255,255,.1);border-left-color:var(--accent);font-weight:bold;color:#fff}
+#sidebar .bottom{margin-top:auto;padding:10px;font-size:11px;text-align:center;opacity:.5}
+#main{margin-left:var(--sw);flex:1;padding:20px 28px;max-width:1100px}
+.page{display:none}
+.page.active{display:block}
+.card{background:var(--card);border-radius:10px;padding:18px 22px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card h2,.card h3{color:var(--primary);margin-bottom:10px}
+.card h3{font-size:16px}
+.btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:5px;transition:.15s;font-family:inherit;font-weight:500}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-warning{background:var(--warning);color:#fff}
+.btn-outline{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+input,select,textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(46,134,193,.1)}
+textarea{resize:vertical;min-height:80px}
+label{display:block;margin-bottom:3px;font-weight:500;color:#555;font-size:13px}
+.fg{margin-bottom:10px}
+.fr{display:flex;gap:10px}
+.fr>*{flex:1}
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.type-card{padding:14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;transition:.15s;background:#fff}
+.type-card:hover{border-color:var(--accent);background:#ebf5fb}
+.type-card.sel{border-color:var(--accent);background:#d6eaf8}
+.type-card .n{font-weight:bold;font-size:14px;margin-bottom:2px}
+.type-card .w{font-size:11px;color:#888}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;margin:6px 0;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--success));border-radius:3px;transition:.4s}
+.writing-content{background:#fafafa;border:1px solid var(--border);border-radius:8px;padding:18px;min-height:200px;max-height:65vh;overflow-y:auto;white-space:pre-wrap;line-height:1.8;font-size:14px}
+.feedback-item{border-left:3px solid var(--warning);padding:6px 10px;margin:4px 0;background:#fef9e7;border-radius:0 6px 6px 0;font-size:12px}
+.feedback-item.done{border-left-color:var(--success);background:#eafaf1}
+.toast{position:fixed;top:16px;right:16px;padding:10px 20px;border-radius:8px;color:#fff;z-index:9999;animation:si .25s;font-size:13px;max-width:400px}
+.toast.success{background:var(--success)}.toast.error{background:var(--danger)}.toast.info{background:var(--accent)}
+@keyframes si{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.stats{display:flex;gap:20px;flex-wrap:wrap}
+.stat{text-align:center;padding:8px 16px;background:#f8f9fa;border-radius:8px}
+.stat .v{font-size:20px;font-weight:bold;color:var(--accent)}
+.stat .l{font-size:11px;color:#888}
+.meta-table{width:100%;border-collapse:collapse;font-size:13px}
+.meta-table td{padding:4px 8px;border-bottom:1px solid #f0f0f0}
+.meta-table td:first-child{color:#888;width:100px}
+@media(max-width:768px){#sidebar{width:54px}#sidebar .nav-item span,#sidebar .logo{display:none}#main{margin-left:54px;padding:10px}.type-grid{grid-template-columns:repeat(2,1fr)}.fr{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<div id="login-overlay">
+  <div style="color:rgba(255,255,255,.8);font-size:48px;margin-bottom:16px;">📝</div>
+  <div class="login-box">
+    <h1>论文智能写作助手</h1>
+    <p class="sub">基于 DeepSeek AI | 输入密码进入</p>
+    <input type="password" id="login-pwd" placeholder="输入访问密码" onkeydown="if(event.key==='Enter')doLogin()" autofocus>
+    <button onclick="doLogin()">登 录</button>
+    <p id="login-err" class="err"></p>
+  </div>
+</div>
+
+<div id="sidebar">
+  <div class="logo">📝 论文助手</div>
+  <div class="net" id="net-status">检测网络中...</div>
+  <div id="sidebar-nav"></div>
+  <div class="bottom">v3.0 | 数据存储于浏览器<br>每台设备独立</div>
+</div>
+
+<div id="main"></div>
+
+<script>
+// ===================== 全局状态 =====================
+const PWD='2004622', DS_URL='https://api.deepseek.com/v1', DS_MODEL='deepseek-chat';
+const STORAGE_KEY='tw_projects';
+// 兼容性：超时fetch（替代AbortSignal.timeout）
+function fetchTimeout(url, opts={}, ms=5000){
+  let c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
+  return fetch(url,{...opts,signal:c.signal}).finally(()=>clearTimeout(t))
+}
+
+let S={
+  page:'home', thesisType:'chinese_bachelor', apiKey:'', apiValidated:false,
+  currentProjectId:null, networkOk:false,
+  metadata:{title:'',title_en:'',author:'',advisor:'',university:'',department:'',student_id:'',degree:'本科'},
+  outline:[], userData:'', referenceLinks:'', references:[], formulas:[],
+  feedbacks:[], currentSectionIdx:0, deaiCfg:{pass1:true,pass2:true,pass3:false,pass4:true,pass5:false}
+};
+let _t=(...a)=>document.querySelector(...a), _id=(n)=>document.getElementById(n);
+
+const THESIS_TYPES={
+  chinese_bachelor:{name:'本科毕业论文',words:15000}, chinese_master:{name:'硕士毕业论文',words:30000},
+  chinese_doctor:{name:'博士毕业论文',words:50000}, journal_paper:{name:'期刊论文',words:8000},
+  course_paper:{name:'课程论文',words:5000}, research_report:{name:'研究报告',words:10000},
+  literature_review:{name:'文献综述',words:8000}
+};
+const NAV=[
+  {id:'home',icon:'🏠',label:'首页'},{id:'metadata',icon:'📋',label:'论文信息'},
+  {id:'apikey',icon:'🔑',label:'API密钥'},{id:'outline',icon:'📑',label:'大纲'},
+  {id:'data',icon:'📊',label:'数据输入'},{id:'writing',icon:'✍️',label:'逐节写作'},
+  {id:'formulas',icon:'📐',label:'公式管理'},{id:'references',icon:'📚',label:'参考文献'},
+  {id:'feedback',icon:'💬',label:'意见反馈'},{id:'deai',icon:'🔄',label:'去AI化'},
+  {id:'export',icon:'📥',label:'导出'}
+];
+
+// ===================== 工具函数 =====================
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toast(m,t='info'){let e=document.createElement('div');e.className='toast '+t;e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2800)}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(S))}
+function load(){let s=localStorage.getItem(STORAGE_KEY);if(s)try{let d=JSON.parse(s);Object.assign(S,d)}catch(e){}}
+function sel(id){return _id(id)?.value||''}
+
+// ===================== 登录 =====================
+function doLogin(){
+  if(_id('login-pwd').value===PWD){
+    _id('login-overlay').classList.add('hidden');load();checkNet();renderSidebar();navigate(S.page||'home')
+  }else{_id('login-err').textContent='密码错误，请重试'}
+}
+
+// ===================== 网络 =====================
+async function checkNet(){
+  try{await fetchTimeout(DS_URL+'/models',{headers:{'Authorization':'Bearer '+(S.apiKey||'test')}},4000);S.networkOk=true}
+  catch(e){
+    try{await fetchTimeout('https://www.baidu.com',{},3000);S.networkOk=false}
+    catch(e2){S.networkOk=false}
+  }
+  let e=_id('net-status');if(S.networkOk){e.innerHTML='🟢 AI可用';e.style.color='#2ecc71'}else{e.innerHTML='🔴 AI不可用';e.style.color='#e74c3c'}
+}
+
+// ===================== 导航 =====================
+function renderSidebar(){
+  _id('sidebar-nav').innerHTML=NAV.map(n=>`<div class="nav-item${S.page===n.id?' active':''}" onclick="navigate('${n.id}')">${n.icon} <span>${n.label}</span></div>`).join('')
+}
+function navigate(p){
+  S.page=p;save();renderSidebar();
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  let el=_id(p);if(el)el.classList.add('active');renderPage(p)
+}
+function renderPage(p){
+  let m=_id('main'),f=window['render'+p.charAt(0).toUpperCase()+p.slice(1)];
+  m.innerHTML=`<div class="page active" id="${p}"></div>`;
+  if(f)f(_id(p));else _id(p).innerHTML=`<div class="card"><h2>${NAV.find(n=>n.id===p)?.label||p}</h2><p>开发中...</p></div>`
+}
+
+// ===================== DeepSeek API =====================
+async function dsCall(sys,usr,stream=false){
+  if(!S.apiKey)throw new Error('请先设置API密钥');
+  let r=await fetch(DS_URL+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},body:JSON.stringify({model:DS_MODEL,messages:[{role:'system',content:sys},{role:'user',content:usr}],temperature:0.7,max_tokens:8192,stream})});
+  if(!r.ok){let e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${r.status}`)}
+  return r
+}
+async function*dsStream(sys,usr){
+  let r=await dsCall(sys,usr,true),reader=r.body.getReader(),dec=new TextDecoder(),buf='';
+  while(1){let{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});
+    let lines=buf.split('\n');buf=lines.pop()||'';
+    for(let l of lines){if(l.startsWith('data: ')){let d=l.slice(6).trim();if(d==='[DONE]')return;
+      try{let c=JSON.parse(d).choices?.[0]?.delta?.content;if(c)yield c}catch(e){}}}}
+}
+
+// ==================== 首页 ====================
+function renderHome(el){
+  let ks=Object.keys(THESIS_TYPES);
+  el.innerHTML=`<h2>📝 论文智能写作助手</h2><p style="color:#888;margin-bottom:14px;">基于 DeepSeek AI | 选择文章类型开始写作</p>
+  <div class="card"><h3>🎓 选择文章类型</h3>
+    <div class="type-grid">${ks.map(k=>`<div class="type-card${S.thesisType===k?' sel':''}" onclick="S.thesisType='${k}';save();renderPage('home')"><div class="n">${THESIS_TYPES[k].name}</div><div class="w">${THESIS_TYPES[k].words.toLocaleString()} 字</div></div>`).join('')}</div>
+    <button class="btn btn-primary" style="margin-top:14px;font-size:14px;padding:10px 24px;" onclick="navigate('metadata')">🚀 开始写作</button>
+  </div>`;
+}
+
+// ==================== 论文信息 ====================
+function renderMetadata(el){
+  let m=S.metadata,t=THESIS_TYPES[S.thesisType];
+  el.innerHTML=`<h2>📋 论文基本信息</h2>
+  <div class="card"><p>类型: <b>${t.name}</b> | 目标: <b>${t.words.toLocaleString()}</b> 字</p></div>
+  <div class="card"><h3>填写信息</h3>
+    <div class="fr"><div class="fg"><label>论文标题 *</label><input id="m-title" value="${esc(m.title)}" placeholder="输入你的研究题目"></div><div class="fg"><label>英文标题</label><input id="m-title_en" value="${esc(m.title_en)}" placeholder="可选"></div></div>
+    <div class="fr"><div class="fg"><label>作者姓名 *</label><input id="m-author" value="${esc(m.author)}"></div><div class="fg"><label>指导教师 *</label><input id="m-advisor" value="${esc(m.advisor)}"></div></div>
+    <div class="fr"><div class="fg"><label>学校 *</label><input id="m-university" value="${esc(m.university)}"></div><div class="fg"><label>院系/专业</label><input id="m-department" value="${esc(m.department)}"></div></div>
+    <div class="fr"><div class="fg"><label>学号</label><input id="m-student_id" value="${esc(m.student_id)}"></div><div class="fg"><label>学位</label><select id="m-degree">${['本科','硕士','博士'].map(d=>`<option ${m.degree===d?'selected':''}>${d}</option>`).join('')}</select></div></div>
+    <button class="btn btn-primary" onclick="saveMeta()">💾 保存并继续</button>
+  </div>
+  ${m.title?`<div class="card"><h3>📄 当前信息</h3><table class="meta-table"><tr><td>标题</td><td>${esc(m.title)}</td></tr><tr><td>作者</td><td>${esc(m.author)}</td></tr><tr><td>导师</td><td>${esc(m.advisor)}</td></tr><tr><td>学校</td><td>${esc(m.university)}</td></tr><tr><td>学位</td><td>${esc(m.degree)}</td></tr></table></div>`:''}`;
+}
+function saveMeta(){
+  S.metadata={title:sel('m-title'),title_en:sel('m-title_en'),author:sel('m-author'),advisor:sel('m-advisor'),university:sel('m-university'),department:sel('m-department'),student_id:sel('m-student_id'),degree:sel('m-degree')};
+  if(!S.metadata.title||!S.metadata.author||!S.metadata.advisor||!S.metadata.university){toast('请填写标题、作者、导师、学校','error');return}
+  save();toast('✅ 信息已保存！','success')
+}
+
+// ==================== API密钥 ====================
+function renderApikey(el){
+  el.innerHTML=`<h2>🔑 DeepSeek API 密钥</h2>
+  <div class="card">
+    ${S.apiKey?`<p style="color:green;">✅ 已设置: <code>${S.apiKey.slice(0,10)}...${S.apiKey.slice(-4)}</code></p>
+      <button class="btn btn-outline btn-sm" onclick="testKey()">🔄 验证</button>
+      <button class="btn btn-danger btn-sm" onclick="S.apiKey='';S.apiValidated=false;save();renderPage('apikey')">🗑️ 删除</button>`:'<p style="color:orange;">⚠️ 未设置密钥</p>'}
+    <hr style="margin:10px 0">
+    <p style="font-size:12px;color:#888;">获取密钥: <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a> | 密钥保存在浏览器本地</p>
+    <div class="fr" style="margin-top:8px;"><input id="api-input" type="password" placeholder="sk-xxxxxxxx" style="flex:3"><button class="btn btn-primary" onclick="saveKey()" style="flex:1">✅ 验证并保存</button></div>
+  </div>`;
+}
+async function saveKey(){
+  let k=sel('api-input');if(!k)return toast('请输入密钥','error');
+  try{let r=await fetch(DS_URL+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:DS_MODEL,messages:[{role:'user',content:'Hi'}],max_tokens:1})});
+    if(r.ok||r.status===400){S.apiKey=k;S.apiValidated=true;save();toast('🎉 密钥验证成功！','success');renderPage('apikey')}
+    else{let e=await r.json().catch(()=>({}));toast('密钥无效: '+(e.error?.message||r.status),'error')}
+  }catch(e){toast('验证失败: '+e.message,'error')}
+}
+async function testKey(){try{await dsCall('','Hi');S.apiValidated=true;toast('✅ 密钥有效','success')}catch(e){S.apiValidated=false;toast('❌ 密钥无效','error')}}
+
+// ==================== 大纲 ====================
+function renderOutline(el){
+  if(!S.apiKey){el.innerHTML='<div class="card"><p>请先设置API密钥</p></div>';return}
+  let items=S.outline;
+  el.innerHTML=`<h2>📑 论文大纲</h2>
+  ${items.length>0?`<div class="card"><div class="stats"><div class="stat"><div class="v">${items.length}</div><div class="l">章节数</div></div><div class="stat"><div class="v">${items.reduce((s,i)=>s+(i.word_target||0),0).toLocaleString()}</div><div class="l">目标字数</div></div></div></div>`:''}
+  <div class="card">
+    ${items.length>0?items.map((s,i)=>`<div class="fr" style="margin:3px 0;align-items:center;background:#f8f9fa;padding:4px 8px;border-radius:4px;"><span style="color:#888;font-size:12px;min-width:22px">${i+1}.</span><input value="${esc(s.title)}" onchange="S.outline[${i}].title=this.value;save()" style="flex:4;padding:4px 6px;font-size:12px;"><input type="number" value="${s.word_target}" onchange="S.outline[${i}].word_target=+this.value;save()" style="flex:1;min-width:60px;padding:4px 6px;font-size:12px;" min="100"><span style="font-size:11px;color:#888;min-width:50px">${s.type||'chapter'}</span></div>`).join(''):'<p style="color:#888;">点击下方按钮用AI生成大纲</p>'}
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <button class="btn btn-primary" onclick="genOutline()" ${!S.networkOk?'disabled':''}>🤖 AI生成大纲</button>
+      ${items.length>0?'<button class="btn btn-outline" onclick="S.outline=[];save();renderPage(\'outline\');">清空</button>':''}
+    </div><div id="out-st" style="margin-top:8px;font-size:13px;"></div>
+  </div>`;
+}
+async function genOutline(){
+  let st=_id('out-st');st.textContent='⏳ 生成中...';
+  try{
+    let full='';
+    for await(let c of dsStream(
+      '你是毕业论文指导教师，请根据标题生成标准大纲。每行格式: 类型|标题|字数。类型为chapter或section。',
+      `标题: ${S.metadata.title}\n类型: ${THESIS_TYPES[S.thesisType].name}\n目标: ${THESIS_TYPES[S.thesisType].words}字\n作者: ${S.metadata.author}\n请生成完整大纲。`
+    )){full+=c;st.textContent=full.slice(-200)}
+    let o=full.split('\n').filter(l=>l.includes('|')).map((l,i)=>{let p=l.split('|').map(x=>x.trim());return{title:p[1]||p[0],word_target:parseInt(p[2])||1000,type:(p[0]||'').includes('chapter')||(p[0]||'').includes('章')?'chapter':'section',content:'',word_count:0,status:'pending'}});
+    if(o.length===0){o=[{title:'第一章 绪论',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'1.1 研究背景与意义',word_target:1000,type:'section',content:'',word_count:0,status:'pending'},{title:'1.2 国内外研究现状',word_target:1200,type:'section',content:'',word_count:0,status:'pending'},{title:'1.3 研究内容与方法',word_target:800,type:'section',content:'',word_count:0,status:'pending'},{title:'第二章 相关理论与技术',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第三章 设计与实现',word_target:4000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第四章 结果与分析',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第五章 总结与展望',word_target:1500,type:'chapter',content:'',word_count:0,status:'pending'}]}
+    S.outline=o;save();st.textContent=`✅ 大纲生成完成！共 ${o.length} 个章节`;renderPage('outline')
+  }catch(e){st.textContent='生成失败: '+e.message}
+}
+
+// ==================== 数据输入 ====================
+function renderData(el){
+  el.innerHTML=`<h2>📊 研究数据输入</h2>
+  <div class="card"><h3>📝 数据描述</h3><p style="color:#888;font-size:12px;">AI写作时会基于这些真实数据生成内容</p>
+    <textarea id="ud" style="height:220px;" placeholder="1. 数据来源：通过问卷调查收集了500份有效问卷&#10;2. 处理方法：使用SPSS 26.0进行统计分析&#10;3. 主要发现：变量A与B呈显著正相关(r=0.78, p<0.01)&#10;4. 样本特征：年龄18-35岁，男女比例1:1.2">${esc(S.userData)}</textarea>
+    <button class="btn btn-primary" style="margin-top:8px;" onclick="S.userData=sel('ud');save();toast('✅ 数据已保存','success')">💾 保存数据</button>
+  </div>`;
+}
+
+// ==================== 逐节写作 ====================
+function renderWriting(el){
+  if(!S.apiKey||S.outline.length===0){el.innerHTML='<div class="card"><p>请先生成大纲并设置API密钥</p></div>';return}
+  let secs=S.outline,idx=Math.min(S.currentSectionIdx,secs.length-1),sec=secs[idx]||secs[0];
+  let w=secs.filter(s=>s.content&&s.content.trim()),tw=w.reduce((s,i)=>s+(i.word_count||0),0),tt=secs.reduce((s,i)=>s+(i.word_target||0),0);
+  el.innerHTML=`<h2>✍️ 逐节写作</h2>
+  <div class="card"><div class="stats"><div class="stat"><div class="v">${w.length}/${secs.length}</div><div class="l">章节进度</div></div><div class="stat"><div class="v">${tw.toLocaleString()}</div><div class="l">已写字数</div></div><div class="stat"><div class="v">${tt.toLocaleString()}</div><div class="l">目标字数</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:${secs.length>0?w.length/secs.length*100:0}%"></div></div></div>
+  <div class="card">
+    <div class="fg"><label>选择章节</label><select onchange="S.currentSectionIdx=+this.value;save();renderPage('writing')">${secs.map((s,i)=>`<option value="${i}" ${i===idx?'selected':''}>${s.content?'✅':''} ${esc(s.title)} (${(s.word_count||0).toLocaleString()}/${(s.word_target||0).toLocaleString()}字)</option>`).join('')}</select></div>
+    <h3>${esc(sec.title)} <span style="color:#888;font-size:12px;">目标 ${(sec.word_target||1000).toLocaleString()} 字</span></h3>
+    ${sec.content?`<details style="margin:8px 0;"><summary>已有内容 (${(sec.word_count||0).toLocaleString()}字)</summary><div class="writing-content">${sec.content}</div></details>`:''}
+    <div class="fg"><label>💬 修改意见（可选，留空为正常写作）</label><textarea id="wfb" placeholder="例如：请加入更多定量分析，对比参考文献结论..."></textarea></div>
+    <button class="btn btn-primary" onclick="genSection(${idx})" ${!S.networkOk?'disabled':''}>🤖 AI生成本节</button>
+    ${sec.content?`<button class="btn btn-success" style="margin-left:6px;" onclick="S.outline[${idx}].status='written';save();toast('✅ 已确认','success');renderPage('writing')">✅ 确认完成</button>`:''}
+    <div id="wout" style="margin-top:10px;"></div>
+  </div>`;
+}
+async function genSection(idx){
+  let sec=S.outline[idx],fb=sel('wfb'),out=_id('wout');
+  if(fb){S.feedbacks.push({time:new Date().toISOString(),section:sec.title,content:fb,status:'pending'});save()}
+  out.innerHTML='<div class="writing-content">⏳ 生成中...</div>';
+  let oc=S.outline.map(s=>`- ${s.title} (${s.word_target}字)`).join('\n');
+  let pc=S.outline.slice(0,idx).filter(s=>s.content).map(s=>`[${s.title}] ${s.content.slice(0,300)}...`).join('\n');
+  let sys=`你是中文学术论文写作专家。撰写符合GB/T 7713标准的毕业论文。学术严谨，逻辑清晰，善用长短句，语言自然流畅。避免AI套话如"值得注意的是""此外""首先其次最后"。适当使用"我们""笔者"等第一人称。格式: 用[N]标注引用，公式处用[FORMULA:N]，表格处用[TABLE:N]。`;
+  let usr=`论文: ${S.metadata.title}\n章节: ${sec.title}\n目标: ${sec.word_target||1000}字\n\n【大纲】\n${oc}\n\n【前文】\n${pc||'(开头)'}\n${S.userData?'\n【数据】\n'+S.userData:''}\n${fb?'\n【修改意见】\n'+fb:''}\n\n请直接输出章节内容。`;
+  try{
+    let full='';out.innerHTML='<div class="writing-content" id="wstream"></div>';let se=_id('wstream');
+    for await(let c of dsStream(sys,usr)){full+=c;se.textContent=full;se.scrollTop=se.scrollHeight}
+    S.outline[idx].content=full;S.outline[idx].word_count=full.length;S.outline[idx].status='writing';save();
+    out.innerHTML=`<div class="writing-content">${full}</div><p style="color:green;margin-top:6px;">✅ 生成完成！共 ${full.length} 字</p>`
+  }catch(e){out.innerHTML=`<p style="color:red;">生成失败: ${e.message}</p>`}
+}
+
+// ==================== 公式管理 ====================
+function renderFormulas(el){
+  el.innerHTML=`<h2>📐 数学公式管理</h2>
+  <div class="card"><h3>➕ 添加公式</h3>
+    <div class="fr"><div class="fg"><label>LaTeX 公式</label><input id="flatex" placeholder="E=mc^2 或 \\frac{a}{b}"></div><div class="fg"><label>描述</label><input id="fdesc" placeholder="可选"></div></div>
+    <div class="fg"><label>所属章节</label><select id="fsec">${S.outline.map(s=>`<option>${esc(s.title)}</option>`).join('')||'<option>全文</option>'}</select></div>
+    <button class="btn btn-outline btn-sm" onclick="previewF()">🔍 预览</button>
+    <button class="btn btn-primary btn-sm" onclick="saveF()">💾 保存</button>
+    <div id="fprev" style="margin-top:8px;text-align:center;padding:16px;background:#f9f9f9;border-radius:6px;"></div>
+  </div>
+  ${S.formulas.length>0?`<div class="card"><h3>已保存 (${S.formulas.length}个)</h3>${S.formulas.map((f,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px;"><span><b>[FORMULA:${i+1}]</b> ${esc(f.latex)} <span style="color:#888;">${esc(f.desc||'')}</span></span><button class="btn btn-danger btn-sm" onclick="S.formulas.splice(${i},1);save();renderPage('formulas')">删除</button></div>`).join('')}</div>`:''}`;
+}
+function previewF(){try{katex.render(sel('flatex'),_id('fprev'),{throwOnError:false,displayMode:true})}catch(e){_id('fprev').innerHTML=`<span style="color:red;">${e.message}</span>`}}
+function saveF(){
+  let l=sel('flatex');if(!l)return;
+  S.formulas.push({latex:l,desc:sel('fdesc'),section:sel('fsec'),order:S.formulas.length+1});save();
+  toast(`✅ 公式已保存 [FORMULA:${S.formulas.length}]`,'success');renderPage('formulas')
+}
+
+// ==================== 参考文献 ====================
+function renderReferences(el){
+  el.innerHTML=`<h2>📚 参考文献管理</h2>
+  <div class="card"><h3>🔗 批量导入链接</h3><p style="color:#888;font-size:12px;">每行一个链接，用 | 分隔备注</p>
+    <textarea id="rlinks" style="height:120px;" placeholder="https://doi.org/10.1234/example | 重要参考&#10;https://kns.cnki.net/... | 某研究">${esc(S.referenceLinks)}</textarea>
+    <button class="btn btn-primary btn-sm" style="margin-top:6px;" onclick="importRefs()">📥 导入</button>
+  </div>
+  <div class="card"><h3>✍️ 手动添加</h3>
+    <div class="fr"><input id="rtext" placeholder="参考文献完整内容" style="flex:3"><select id="rtype" style="flex:1"><option>J</option><option>M</option><option>D</option><option>C</option><option>EB/OL</option></select><button class="btn btn-outline btn-sm" onclick="addRef()">添加</button></div>
+  </div>
+  ${S.references.length>0?`<div class="card"><h3>列表 (${S.references.length}条)</h3>${S.references.map((r,i)=>`<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:12px;"><b>[${i+1}]</b> ${esc(r.text)} <span style="color:#888;">[${r.type}]</span><button class="btn btn-danger btn-sm" style="float:right;padding:2px 6px;font-size:11px;" onclick="S.references.splice(${i},1);save();renderPage('references')">删除</button></div>`).join('')}</div>`:''}`;
+}
+function importRefs(){let t=sel('rlinks');S.referenceLinks=t;if(!t)return;t.split('\n').filter(l=>l.trim()).forEach(l=>{let p=l.split('|').map(x=>x.trim());S.references.push({text:p[0],type:'EB/OL',note:p[1]||''})});save();toast(`✅ 已导入`,'success');renderPage('references')}
+function addRef(){let t=sel('rtext');if(!t)return;S.references.push({text:t,type:sel('rtype'),note:''});save();toast('✅ 已添加','success');renderPage('references')}
+
+// ==================== 意见反馈 ====================
+function renderFeedback(el){
+  el.innerHTML=`<h2>💬 意见反馈</h2>
+  <div class="card"><h3>✍️ 提出新意见</h3>
+    <div class="fr"><div class="fg"><label>类型</label><select id="fbtype"><option>修改内容</option><option>调整风格</option><option>补充内容</option><option>删除内容</option><option>结构调整</option><option>其他</option></select></div><div class="fg"><label>章节</label><select id="fbsec">${S.outline.map(s=>`<option>${esc(s.title)}</option>`).join('')||'<option>全文</option>'}</select></div></div>
+    <div class="fg"><label>具体意见</label><textarea id="fbcontent" placeholder="详细描述修改要求..."></textarea></div>
+    <button class="btn btn-primary" onclick="addFb()">📩 提交意见</button>
+  </div>
+  ${S.feedbacks.length>0?`<div class="card"><h3>📋 意见历史 (${S.feedbacks.length}条)</h3>${S.feedbacks.slice().reverse().map((f,i)=>`<div class="feedback-item${f.status==='done'?' done':''}"><b>[${f.type||'意见'}]</b> → ${esc(f.section||'')} | ${(f.time||'').slice(0,10)}<br>${esc(f.content)}<br><span style="font-size:11px;color:#888;">状态: ${f.status==='done'?'✅已处理':'⏳待处理'}</span> ${f.status!=='done'?`<button class="btn btn-success btn-sm" onclick="S.feedbacks[S.feedbacks.length-1-${i}].status='done';save();renderPage('feedback')">标记已处理</button>`:''}</div>`).join('')}</div>`:'<div class="card"><p style="color:#888;">暂无意见记录</p></div>'}`;
+}
+function addFb(){let c=sel('fbcontent');if(!c.trim())return;S.feedbacks.push({type:sel('fbtype'),section:sel('fbsec'),content:c.trim(),time:new Date().toISOString(),status:'pending'});save();toast('✅ 意见已提交','success');renderPage('feedback')}
+
+// ==================== 去AI化 ====================
+let _deaiRunning=false;
+async function runDeAI(){
+  if(_deaiRunning)return;_deaiRunning=true;
+  let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){toast('没有已撰写的章节','error');_deaiRunning=false;return}
+  let cfg=S.deaiCfg,enabled=Object.entries(cfg).filter(([,v])=>v);if(!enabled.length){toast('请至少选择一轮','error');_deaiRunning=false;return}
+  let styles={pass1:{name:'学术结构化',desc:'使用正式学术论文语言，消除聊天机器人感，使用学术惯用留有余地的表达（"可以认为""在一定程度上"），避免"值得注意的是""此外"等AI套话。'},pass2:{name:'自然变化注入',desc:'混合长短句（25字以上+5-8字），段落长度要变化，打破均匀节奏感，使用破折号、冒号等增强表达，避免节奏过于均匀。'},pass3:{name:'个人视角注入',desc:'适当使用"我们""笔者"等第一人称，加入研究者个人判断（"我们发现""经过反复实验"），个人化表达自然融入，不改变核心内容和引用。'},pass4:{name:'具体化增强',desc:'将模糊表述替换为具体数据，精确表述年份、百分比等，使用具体例子说明抽象概念，创造合理学术细节补充。'},pass5:{name:'混合人类节奏',desc:'加入修辞问句，添加括号内简短评论，使用一两个略微口语化但不过分的表达，增添人类写作的自然"不完美感"。'}};
+  let out=_id('daout');out.innerHTML='';
+  for(let s of secs){
+    out.innerHTML+=`<p>处理: <b>${esc(s.title)}</b>...</p>`;
+    let txt=s.content;
+    for(let [k,_] of enabled){
+      let st=styles[k];out.innerHTML+=`<p style="color:#888;font-size:12px;">→ ${st.name}...</p>`;
+      try{
+        let full='';
+        for await(let c of dsStream(`请按以下风格改写文本: ${st.desc}\n保留所有引用标记[1][2]等和公式标记[FORMULA:N]。`,txt.slice(0,6000))){full+=c}
+        if(full.trim())txt=full;
+      }catch(e){out.innerHTML+=`<p style="color:red;">${st.name}失败: ${e.message}</p>`}
+    }
+    s.content=txt;s.word_count=txt.length;s.deai_passes=(s.deai_passes||0)+enabled.length;
+    out.innerHTML+=`<p style="color:green;">✅ ${esc(s.title)} 完成</p>`;
+  }
+  save();out.innerHTML+='<p style="color:green;font-weight:bold;font-size:15px;">🎉 全部去AI化处理完成！</p>';
+  _deaiRunning=false
+}
+function renderDeai(el){
+  let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){el.innerHTML='<div class="card"><p>没有已撰写的章节</p></div>';return}
+  let cfg=S.deaiCfg,nn={pass1:'学术结构化',pass2:'自然变化注入',pass3:'个人视角注入',pass4:'具体化增强',pass5:'混合人类节奏'};
+  el.innerHTML=`<h2>🔄 去AI化处理</h2><p style="color:#888;margin-bottom:10px;">多轮不同风格改写，降低AI检测率</p>
+  <div class="card"><h3>⚙️ 选择改写轮次</h3>${Object.entries(nn).map(([k,n],i)=>`<label style="display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;"><input type="checkbox" ${cfg[k]?'checked':''} onchange="S.deaiCfg['${k}']=this.checked;save()"> 第${i+1}轮: <b>${n}</b></label>`).join('')}
+    <p style="font-size:11px;color:#888;margin-top:4px;">建议至少选前3轮，效果最佳</p>
+    <button class="btn btn-primary" style="margin-top:10px;" onclick="runDeAI()" ${_deaiRunning||!S.networkOk?'disabled':''}>🚀 开始处理 (${secs.length}个章节)</button>
+    <div id="daout" style="margin-top:10px;font-size:13px;"></div>
+  </div>`;
+}
+
+// ==================== 导出 ====================
+async function doExport(){
+  let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){toast('没有已完成的章节','error');return}
+  let m=S.metadata,h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><style>body{font-family:SimSun,serif;font-size:12pt;line-height:1.5}h1{font-family:SimHei,sans-serif;font-size:22pt;text-align:center}h2{font-family:SimHei,sans-serif;font-size:16pt}h3{font-family:SimHei,sans-serif;font-size:14pt}p{text-indent:2em;margin:6pt 0}@page{size:A4;margin:2.54cm 3.17cm}</style></head><body>`;
+  h+=`<br><br><br><br><h1>${m.title}</h1><br><p style="text-align:center">作者：${m.author}</p><p style="text-align:center">指导教师：${m.advisor}</p><p style="text-align:center">${m.university} | ${m.department}</p><p style="text-align:center">${new Date().toISOString().slice(0,7)}</p><br style="page-break-after:always">`;
+  h+=`<h2>摘要</h2><p>（请在Word中手动补充摘要内容）</p><br style="page-break-after:always">`;
+  for(let s of secs){h+=`<h2>${s.title}</h2>`;s.content.split('\n').filter(p=>p.trim()).forEach(p=>h+=`<p>${p}</p>`);if(s!==secs[secs.length-1])h+=`<br style="page-break-after:always">`}
+  if(S.references.length>0){h+=`<br style="page-break-after:always"><h2>参考文献</h2>`;S.references.forEach((r,i)=>h+=`<p style="text-indent:0;font-size:10.5pt">[${i+1}] ${r.text}</p>`)}
+  h+=`<br style="page-break-after:always"><h2>致谢</h2><p>本论文的完成离不开导师的悉心指导和同学们的热情帮助，在此表示衷心的感谢。</p></body></html>`;
+  let b=new Blob([h],{type:'application/msword'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download=(m.title||'论文')+'.doc';a.click();URL.revokeObjectURL(u);toast('✅ 论文已导出！用Word打开即可','success')
+}
+function renderExport(el){
+  let secs=S.outline,w=secs.filter(s=>s.content&&s.content.trim()),tw=w.reduce((s,i)=>s+(i.word_count||0),0);
+  el.innerHTML=`<h2>📥 导出论文</h2>
+  <div class="card"><div class="stats"><div class="stat"><div class="v">${w.length}/${secs.length}</div><div class="l">章节完成</div></div><div class="stat"><div class="v">${tw.toLocaleString()}</div><div class="l">总字数</div></div><div class="stat"><div class="v">${S.formulas.length}</div><div class="l">公式</div></div><div class="stat"><div class="v">${S.references.length}</div><div class="l">参考文献</div></div></div></div>
+  <div class="card"><h3>各章节状态</h3>${secs.map(s=>`<p>${s.content?'✅':''} ${esc(s.title)} — ${(s.word_count||0).toLocaleString()}字 ${s.deai_passes?`| 去AI: ${s.deai_passes}轮`:''}</p>`).join('')}</div>
+  ${w.length>0?`<div class="card"><button class="btn btn-primary" onclick="doExport()" style="font-size:15px;padding:10px 28px;">🎓 生成Word文档 (.doc)</button><p style="color:#888;font-size:11px;margin-top:6px;">下载后用 Microsoft Word 打开，右键目录区域更新域即可生成自动目录</p></div>`:'<div class="card"><p>没有已完成的章节，无法导出</p></div>'}`;
+}
+
+// ===================== 初始化 =====================
+checkNet();renderSidebar();navigate(S.page||'home');
+</script>
+</body>
+</html>

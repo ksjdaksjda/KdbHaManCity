@@ -1,0 +1,8 @@
+{
+  "name": "thesis-writer",
+  "version": "3.0.0",
+  "description": "论文智能写作助手",
+  "scripts": {
+    "build": "mkdir -p dist && cp index.html _headers package.json dist/"
+  }
+}
