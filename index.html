@@ -20,8 +20,7 @@ body{font:14px/1.6 'Microsoft YaHei','PingFang SC',sans-serif;color:var(--txt);d
 .login-box input{width:100%;padding:12px;border:2px solid var(--bor);border-radius:8px;font-size:15px;text-align:center;margin:8px 0;outline:none}
 .login-box input:focus{border-color:var(--acc)}
 .login-box button{width:100%;padding:12px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:bold;transition:.2s}
-.login-box button:hover{background:#2471a3}
-.login-box .err{color:var(--err);margin-top:8px;font-size:13px;min-height:20px}
+.login-box button:hover{background:#2471a3}.login-box .err{color:var(--err);margin-top:8px;font-size:13px;min-height:20px}
 #sidebar{width:var(--sw);background:linear-gradient(180deg,#1a3c54,#1a5276);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;display:flex;flex-direction:column}
 #sidebar .logo{padding:14px 16px;font-size:16px;font-weight:bold;border-bottom:1px solid rgba(255,255,255,.1);text-align:center}
 #sidebar .net{padding:6px 16px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.05)}
@@ -30,9 +29,8 @@ body{font:14px/1.6 'Microsoft YaHei','PingFang SC',sans-serif;color:var(--txt);d
 #sidebar .nav-item.active{background:rgba(255,255,255,.1);border-left-color:var(--acc);font-weight:bold;color:#fff}
 #sidebar .bottom{margin-top:auto;padding:10px;font-size:11px;text-align:center;opacity:.5}
 #main{margin-left:var(--sw);flex:1;padding:20px 28px;max-width:1100px}
-.page{display:none}
-.page.active{display:block}
-.card{background:var(--card);border-radius:10px;padding:18px 22px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.05);overflow-x:auto}
+.page{display:none}.page.active{display:block}
+.card{background:rgba(255,255,255,.92);border-radius:10px;padding:18px 22px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow-x:auto}
 .card h2,.card h3{color:var(--pri);margin-bottom:10px}
 .btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:5px;transition:.15s;font-family:inherit;font-weight:500}
 .btn:hover{opacity:.88;transform:translateY(-1px)}.btn:active{transform:translateY(0)}
@@ -46,26 +44,23 @@ label{display:block;margin-bottom:3px;font-weight:500;color:#555;font-size:13px}
 .type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .type-card{padding:14px;border:2px solid var(--bor);border-radius:10px;cursor:pointer;text-align:center;transition:.15s;background:#fff}
 .type-card:hover{border-color:var(--acc);background:#ebf5fb}
-.type-card.sel{border-color:var(--acc);background:#d6eaf8}
-.type-card .n{font-weight:bold;font-size:14px;margin-bottom:2px}
-.type-card .w{font-size:11px;color:#888}
+.type-card.sel{border-color:var(--acc);background:#d6eaf8}.type-card .n{font-weight:bold;font-size:14px}.type-card .w{font-size:11px;color:#888}
 .progress-bar{height:6px;background:var(--bor);border-radius:3px;margin:6px 0;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--suc));border-radius:3px;transition:.4s}
 .writing-content{background:#fafafa;border:1px solid var(--bor);border-radius:8px;padding:18px;min-height:200px;max-height:65vh;overflow-y:auto;white-space:pre-wrap;line-height:1.8;font-size:14px}
 .fb-item{border-left:3px solid var(--war);padding:6px 10px;margin:4px 0;background:#fef9e7;border-radius:0 6px 6px 0;font-size:12px}.fb-item.done{border-left-color:var(--suc);background:#eafaf1}
-.toast{position:fixed;top:16px;right:16px;padding:10px 20px;border-radius:8px;color:#fff;z-index:9999;animation:si .25s;font-size:13px;max-width:400px}
+.toast{position:fixed;top:16px;right:16px;padding:10px 20px;border-radius:8px;color:#fff;z-index:9999;animation:si .25s;font-size:13px}
 .toast.success{background:var(--suc)}.toast.error{background:var(--err)}.toast.info{background:var(--acc)}
 @keyframes si{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 .stats{display:flex;gap:20px;flex-wrap:wrap}
-.stat{text-align:center;padding:8px 16px;background:#f8f9fa;border-radius:8px}.stat .v{font-size:20px;font-weight:bold;color:var(--acc)}.stat .l{font-size:11px;color:#888}
-.formula-highlight{background:#fff3cd;padding:2px 6px;border-radius:4px;font-size:13px;cursor:pointer}
+.stat{text-align:center;padding:8px 16px;background:rgba(248,249,250,.8);border-radius:8px}.stat .v{font-size:20px;font-weight:bold;color:var(--acc)}.stat .l{font-size:11px;color:#888}
 .data-table{width:100%;border-collapse:collapse;font-size:12px}
 .data-table th,.data-table td{padding:4px 8px;border:1px solid var(--bor);text-align:left}
-.data-table th{background:#f0f5fa;font-weight:bold}
-.data-table tr:hover{background:#f8f9fa}
+.data-table th{background:#f0f5fa;font-weight:bold}.data-table tr:hover{background:#f8f9fa}
 .tab-nav{display:flex;gap:4px;margin-bottom:12px;border-bottom:2px solid var(--bor)}
 .tab-nav span{padding:6px 14px;cursor:pointer;border-radius:6px 6px 0 0;font-size:13px;transition:.15s}
 .tab-nav span:hover{background:#e8f0fe}.tab-nav span.active{background:var(--acc);color:#fff}
-.upload-zone{border:2px dashed var(--bor);border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:.2s;background:#fafafa}.upload-zone:hover{border-color:var(--acc);background:#ebf5fb}
+.upload-zone{border:2px dashed var(--bor);border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:.2s;background:rgba(250,250,250,.6)}
+.upload-zone:hover{border-color:var(--acc);background:#ebf5fb}
 canvas{max-width:100%;margin:8px 0}
 @media(max-width:768px){#sidebar{width:54px}#sidebar .nav-item span,#sidebar .logo{display:none}#main{margin-left:54px;padding:10px}.type-grid{grid-template-columns:repeat(2,1fr)}.fr{flex-direction:column}}
 </style>
@@ -75,61 +70,34 @@ canvas{max-width:100%;margin:8px 0}
 <div id="login-overlay">
   <div style="color:rgba(255,255,255,.8);font-size:48px;margin-bottom:16px;">📝</div>
   <div class="login-box">
-    <h1>论文智能写作助手</h1><p class="sub">基于 DeepSeek AI | 输入密码进入</p>
+    <h1>论文智能写作助手</h1><p class="sub">基于 DeepSeek AI | 支持Excel数据导入 | 公式自动识别</p>
     <input type="password" id="login-pwd" placeholder="输入访问密码" onkeydown="if(event.key==='Enter')doLogin()" autofocus>
     <button onclick="doLogin()">登 录</button><p id="login-err" class="err"></p>
   </div>
 </div>
 
 <div id="sidebar">
-  <div class="logo">📝 论文助手</div>
-  <div class="net" id="net-status">检测网络中...</div>
-  <div id="sidebar-nav"></div>
-  <div class="bottom">v4.0 | 数据存储于浏览器<br>每台设备独立</div>
+  <div class="logo">📝 论文助手</div><div class="net" id="net-status">检测网络中...</div>
+  <div id="sidebar-nav"></div><div class="bottom">v5.0 | 数据本地存储<br>每台设备独立</div>
 </div>
-
 <div id="main"></div>
 
 <script>
 // ==================== 全局状态 ====================
-const PWD='2004622',DS_URL='https://api.deepseek.com/v1',DS_MODEL='deepseek-chat',STORAGE_KEY='tw_projects';
-let S={page:'home',thesisType:'chinese_bachelor',apiKey:'',apiValidated:false,networkOk:false,metadata:{title:'',title_en:'',author:'',advisor:'',university:'',department:'',student_id:'',degree:'本科'},outline:[],userData:'',referenceLinks:'',references:[],formulas:[],feedbacks:[],currentSectionIdx:0,deaiCfg:{pass1:true,pass2:true,pass3:false,pass4:true,pass5:false},uploadedFiles:[],dataTables:{},dataCharts:{},selectedDataTab:'text'};
+const PWD='2004622',DS_URL='https://api.deepseek.com/v1',DS_MODEL='deepseek-chat',STORAGE_KEY='tw_data';
+let S={page:'home',thesisType:'chinese_bachelor',apiKey:'',apiValidated:false,networkOk:false,metadata:{title:'',title_en:'',author:'',advisor:'',university:'',department:'',student_id:'',degree:'本科'},outline:[],userData:'',referenceLinks:'',references:[],formulas:[],feedbacks:[],currentSectionIdx:0,deaiCfg:{pass1:true,pass2:true,pass3:false,pass4:true,pass5:false},uploadedFiles:[],dataTables:{},dataCharts:{},uploadedImages:[],selectedDataTab:'text'};
 let _id=n=>document.getElementById(n),_esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
 const THESIS_TYPES={chinese_bachelor:{name:'本科毕业论文',words:15000},chinese_master:{name:'硕士毕业论文',words:30000},chinese_doctor:{name:'博士毕业论文',words:50000},journal_paper:{name:'期刊论文',words:8000},course_paper:{name:'课程论文',words:5000},research_report:{name:'研究报告',words:10000},literature_review:{name:'文献综述',words:8000}};
 const NAV=[{id:'home',icon:'🏠',label:'首页'},{id:'metadata',icon:'📋',label:'论文信息'},{id:'apikey',icon:'🔑',label:'API密钥'},{id:'outline',icon:'📑',label:'大纲'},{id:'data',icon:'📊',label:'数据输入'},{id:'writing',icon:'✍️',label:'逐节写作'},{id:'formulas',icon:'📐',label:'公式管理'},{id:'references',icon:'📚',label:'参考文献'},{id:'feedback',icon:'💬',label:'意见反馈'},{id:'deai',icon:'🔄',label:'去AI化'},{id:'export',icon:'📥',label:'导出'}];
 
-const COMMON_FORMULAS=[
-  {name:'均值',latex:'\\bar{x}=\\frac{1}{n}\\sum_{i=1}^{n}x_i',pattern:/均值|平均数|平均值|\\bar\{x\}|mean/g},
-  {name:'方差',latex:'s^2=\\frac{1}{n-1}\\sum_{i=1}^{n}(x_i-\\bar{x})^2',pattern:/方差|variance|s\^2/g},
-  {name:'标准差',latex:'s=\\sqrt{\\frac{1}{n-1}\\sum_{i=1}^{n}(x_i-\\bar{x})^2}',pattern:/标准差|standard deviation/g},
-  {name:'t检验',latex:'t=\\frac{\\bar{x}_1-\\bar{x}_2}{\\sqrt{\\frac{s_1^2}{n_1}+\\frac{s_2^2}{n_2}}}',pattern:/t.?检验|t.?test|t统计量/g},
-  {name:'卡方',latex:'\\chi^2=\\sum\\frac{(O_i-E_i)^2}{E_i}',pattern:/卡方|chi.?square|\\chi\^2/g},
-  {name:'相关系数',latex:'r=\\frac{\\sum(x_i-\\bar{x})(y_i-\\bar{y})}{\\sqrt{\\sum(x_i-\\bar{x})^2\\sum(y_i-\\bar{y})^2}}',pattern:/相关系数|correlation|皮尔逊|pearson/g},
-  {name:'回归方程',latex:'y=\\beta_0+\\beta_1 x+\\varepsilon',pattern:/回归方程|regression|线性回归/g},
-  {name:'正态分布',latex:'f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}',pattern:/正态分布|normal distribution|高斯/g},
-  {name:'矩阵',latex:'A=\\begin{pmatrix}a_{11}&a_{12}\\\\a_{21}&a_{22}\\end{pmatrix}',pattern:/矩阵|matrix/g},
-  {name:'积分',latex:'\\int_{a}^{b}f(x)dx',pattern:/积分|integral|∫/g},
-  {name:'极限',latex:'\\lim_{x\\to\\infty}f(x)=L',pattern:/极限|limit/g},
-  {name:'导数',latex:'f\'(x)=\\lim_{h\\to 0}\\frac{f(x+h)-f(x)}{h}',pattern:/导数|derivative/g},
-  {name:'偏导',latex:'\\frac{\\partial f}{\\partial x}',pattern:/偏导|partial derivative/g},
-  {name:'求和',latex:'\\sum_{i=1}^{n}i=\\frac{n(n+1)}{2}',pattern:/求和|sum|∑/g},
-  {name:'P值',latex:'p<0.01',pattern:/p\s*[<>=]\s*0\.\d+/g},
-  {name:'自由度',latex:'df=n-1',pattern:/自由度|df\s*=/g},
-  {name:'置信区间',latex:'CI=\\bar{x}\\pm z_{\\alpha/2}\\frac{\\sigma}{\\sqrt{n}}',pattern:/置信区间|confidence interval|CI/g},
-  {name:'信息熵',latex:'H(X)=-\\sum p(x_i)\\log_2 p(x_i)',pattern:/熵|entropy/g},
-  {name:'欧拉公式',latex:'e^{i\\pi}+1=0',pattern:/欧拉|euler/g},
-  {name:'质能方程',latex:'E=mc^2',pattern:/质能|E=mc\^?2/g},
-];
-
 function toast(m,t='info'){let e=document.createElement('div');e.className='toast '+t;e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2800)}
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(S))}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(S))}catch(e){toast('存储空间不足，请清理旧数据','error')}}
 function load(){let s=localStorage.getItem(STORAGE_KEY);if(s)try{let d=JSON.parse(s);Object.assign(S,d)}catch(e){}}
-function fetchTimeout(url,opts={},ms=5000){let c=new AbortController(),t=setTimeout(()=>c.abort(),ms);return fetch(url,{...opts,signal:c.signal}).finally(()=>clearTimeout(t))}
+function ft(url,opts={},ms=5000){let c=new AbortController(),t=setTimeout(()=>c.abort(),ms);return fetch(url,{...opts,signal:c.signal}).finally(()=>clearTimeout(t))}
 
 // ==================== 登录 ====================
 function doLogin(){if(_id('login-pwd').value===PWD){_id('login-overlay').classList.add('hidden');load();checkNet();renderSidebar();navigate(S.page||'home')}else{_id('login-err').textContent='密码错误'}}
-async function checkNet(){try{await fetchTimeout(DS_URL+'/models',{headers:{'Authorization':'Bearer '+(S.apiKey||'test')}},4000);S.networkOk=true}catch(e){try{await fetchTimeout('https://www.baidu.com',{},3000);S.networkOk=false}catch(e2){S.networkOk=false}}let e=_id('net-status');if(S.networkOk){e.innerHTML='🟢 AI可用';e.style.color='#2ecc71'}else{e.innerHTML='🔴 AI不可用';e.style.color='#e74c3c'}}
+async function checkNet(){try{await ft(DS_URL+'/models',{headers:{'Authorization':'Bearer '+(S.apiKey||'test')}},4000);S.networkOk=true}catch(e){try{await ft('https://www.baidu.com',{},3000);S.networkOk=false}catch(e2){S.networkOk=false}}let e=_id('net-status');if(S.networkOk){e.innerHTML='🟢 AI可用';e.style.color='#2ecc71'}else{e.innerHTML='🔴 AI不可用';e.style.color='#e74c3c'}}
 
 // ==================== 导航 ====================
 function renderSidebar(){_id('sidebar-nav').innerHTML=NAV.map(n=>`<div class="nav-item${S.page===n.id?' active':''}" onclick="navigate('${n.id}')">${n.icon} <span>${n.label}</span></div>`).join('')}
@@ -141,173 +109,231 @@ async function dsCall(sys,usr,stream=false){if(!S.apiKey)throw new Error('请先
 async function*dsStream(sys,usr){let r=await dsCall(sys,usr,true),reader=r.body.getReader(),dec=new TextDecoder(),buf='';while(1){let{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});let lines=buf.split('\n');buf=lines.pop()||'';for(let l of lines){if(l.startsWith('data: ')){let d=l.slice(6).trim();if(d==='[DONE]')return;try{let c=JSON.parse(d).choices?.[0]?.delta?.content;if(c)yield c}catch(e){}}}}}
 
 // ==================== 首页 ====================
-function renderHome(el){let ks=Object.keys(THESIS_TYPES);el.innerHTML=`<h2>📝 论文智能写作助手</h2><p style="color:#888;margin-bottom:14px;">基于 DeepSeek AI | 支持 Excel 数据导入 | 公式自动识别</p><div class="card"><h3>🎓 选择文章类型</h3><div class="type-grid">${ks.map(k=>`<div class="type-card${S.thesisType===k?' sel':''}" onclick="S.thesisType='${k}';save();renderPage('home')"><div class="n">${THESIS_TYPES[k].name}</div><div class="w">${THESIS_TYPES[k].words.toLocaleString()} 字</div></div>`).join('')}</div><button class="btn btn-primary" style="margin-top:14px;font-size:14px;padding:10px 24px;" onclick="navigate('metadata')">🚀 开始写作</button></div>`}
+function renderHome(el){let ks=Object.keys(THESIS_TYPES);el.innerHTML=`<h2>📝 论文智能写作助手</h2><p style="color:#888;margin-bottom:14px;">DeepSeek AI | Excel数据导入 | 公式自动识别 | 图表生成</p><div class="card"><h3>🎓 选择文章类型</h3><div class="type-grid">${ks.map(k=>`<div class="type-card${S.thesisType===k?' sel':''}" onclick="S.thesisType='${k}';save();renderPage('home')"><div class="n">${THESIS_TYPES[k].name}</div><div class="w">${THESIS_TYPES[k].words.toLocaleString()} 字</div></div>`).join('')}</div><button class="btn btn-primary" style="margin-top:14px;font-size:14px;padding:10px 24px;" onclick="navigate('metadata')">🚀 开始写作</button></div>`}
 
 // ==================== 论文信息 ====================
 function renderMetadata(el){let m=S.metadata,t=THESIS_TYPES[S.thesisType];el.innerHTML=`<h2>📋 论文基本信息</h2><div class="card"><p>类型: <b>${t.name}</b> | 目标: <b>${t.words.toLocaleString()}</b> 字</p></div><div class="card"><h3>填写信息</h3><div class="fr"><div class="fg"><label>论文标题 *</label><input id="m-title" value="${_esc(m.title)}" placeholder="输入研究题目"></div><div class="fg"><label>英文标题</label><input id="m-title_en" value="${_esc(m.title_en)}" placeholder="可选"></div></div><div class="fr"><div class="fg"><label>作者姓名 *</label><input id="m-author" value="${_esc(m.author)}"></div><div class="fg"><label>指导教师 *</label><input id="m-advisor" value="${_esc(m.advisor)}"></div></div><div class="fr"><div class="fg"><label>学校 *</label><input id="m-university" value="${_esc(m.university)}"></div><div class="fg"><label>院系/专业</label><input id="m-department" value="${_esc(m.department)}"></div></div><div class="fr"><div class="fg"><label>学号</label><input id="m-student_id" value="${_esc(m.student_id)}"></div><div class="fg"><label>学位</label><select id="m-degree">${['本科','硕士','博士'].map(d=>`<option ${m.degree===d?'selected':''}>${d}</option>`).join('')}</select></div></div><button class="btn btn-primary" onclick="saveMeta()">💾 保存并继续</button></div>${m.title?`<div class="card"><h3>📄 当前信息</h3><table style="width:100%;font-size:13px;"><tr><td style="color:#888;width:80px;">标题</td><td>${_esc(m.title)}</td></tr><tr><td style="color:#888;">作者</td><td>${_esc(m.author)}</td></tr><tr><td style="color:#888;">导师</td><td>${_esc(m.advisor)}</td></tr><tr><td style="color:#888;">学校</td><td>${_esc(m.university)}</td></tr><tr><td style="color:#888;">学位</td><td>${_esc(m.degree)}</td></tr></table></div>`:''}`}
-function saveMeta(){let f=['title','title_en','author','advisor','university','department','student_id','degree'];f.forEach(k=>S.metadata[k]=_id('m-'+k).value);if(!S.metadata.title||!S.metadata.author||!S.metadata.advisor||!S.metadata.university){toast('请填写标题、作者、导师、学校','error');return}save();toast('✅ 信息已保存','success')}
+function saveMeta(){['title','title_en','author','advisor','university','department','student_id','degree'].forEach(k=>S.metadata[k]=_id('m-'+k).value);if(!S.metadata.title||!S.metadata.author||!S.metadata.advisor||!S.metadata.university){toast('请填写标题、作者、导师、学校','error');return}save();toast('✅ 信息已保存','success')}
 
 // ==================== API密钥 ====================
 function renderApikey(el){el.innerHTML=`<h2>🔑 DeepSeek API 密钥</h2><div class="card">${S.apiKey?`<p style="color:green;">✅ 已设置: <code>${S.apiKey.slice(0,10)}...${S.apiKey.slice(-4)}</code></p><button class="btn btn-outline btn-sm" onclick="testKey()">🔄 验证</button><button class="btn btn-danger btn-sm" onclick="S.apiKey='';S.apiValidated=false;save();renderPage('apikey')">🗑️ 删除</button>`:'<p style="color:orange;">⚠️ 未设置密钥</p>'}<hr style="margin:10px 0"><p style="font-size:12px;color:#888;">获取: <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a> | 浏览器本地存储</p><div class="fr" style="margin-top:8px;"><input id="api-input" type="password" placeholder="sk-xxxxxxxx" style="flex:3"><button class="btn btn-primary" onclick="saveKey()" style="flex:1">✅ 验证并保存</button></div></div>`}
 async function saveKey(){let k=_id('api-input').value;if(!k)return toast('请输入密钥','error');try{let r=await fetch(DS_URL+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:DS_MODEL,messages:[{role:'user',content:'Hi'}],max_tokens:1})});if(r.ok||r.status===400){S.apiKey=k;S.apiValidated=true;save();toast('🎉 验证成功','success');renderPage('apikey')}else{let e=await r.json().catch(()=>({}));toast('无效: '+(e.error?.message||r.status),'error')}}catch(e){toast('失败: '+e.message,'error')}}
 async function testKey(){try{await dsCall('','Hi');S.apiValidated=true;toast('✅ 有效','success')}catch(e){S.apiValidated=false;toast('❌ 无效','error')}}
 
-// ==================== 数据输入（增强版：Excel/CSV上传 + 表格预览 + 图表） ====================
+// ==================== 数据输入（增强版） ====================
 function renderData(el){
-  let tabs=['text','table','chart'],names=['📝 文字描述','📊 上传数据','📈 图表'];
+  let tabs=['text','table','chart','image'],names=['📝 文字描述','📊 上传Excel/CSV','📈 数据图表','🖼️ 图片上传'];
   let active=S.selectedDataTab||'text';
-  el.innerHTML=`<h2>📊 研究数据输入</h2>
-  <div class="tab-nav">${tabs.map((t,i)=>`<span class="${active===t?'active':''}" onclick="S.selectedDataTab='${t}';save();renderPage('data')">${names[i]}</span>`).join('')}</div>`;
+  el.innerHTML=`<h2>📊 研究数据输入</h2><div class="tab-nav">${tabs.map((t,i)=>`<span class="${active===t?'active':''}" onclick="S.selectedDataTab='${t}';save();renderPage('data')">${names[i]}</span>`).join('')}</div>`;
 
   if(active==='text'){
-    el.innerHTML+=`<div class="card"><h3>📝 数据描述</h3><textarea id="ud" style="height:220px;" placeholder="1. 数据来源：问卷调查500份&#10;2. 处理方法：SPSS 26.0统计分析&#10;3. 主要发现：A与B正相关(r=0.78)&#10;4. 样本：18-35岁，男女1:1.2">${_esc(S.userData)}</textarea><button class="btn btn-primary" style="margin-top:8px;" onclick="S.userData=_id('ud').value;save();toast('✅ 已保存','success')">💾 保存描述</button></div>`;
+    el.innerHTML+=`<div class="card"><h3>📝 数据描述</h3><p style="color:#888;font-size:12px;margin-bottom:8px;">描述数据来源、处理方法、分析结果。AI写作时会使用这些信息。也可以粘贴表格数据。</p><textarea id="ud" style="height:220px;" placeholder="1. 数据来源：问卷调查500份&#10;2. 处理方法：SPSS 26.0&#10;3. 主要发现：A与B正相关(r=0.78, p<0.01)&#10;4. 样本：18-35岁">${_esc(S.userData)}</textarea><button class="btn btn-primary" style="margin-top:8px;" onclick="S.userData=_id('ud').value;save();toast('✅ 已保存','success')">💾 保存描述</button></div>`;
   }else if(active==='table'){
-    el.innerHTML+=`<div class="card"><h3>📊 上传数据文件 (Excel/CSV)</h3><div class="upload-zone" id="drop-zone" ondrop="handleDrop(event)" ondragover="event.preventDefault()" onclick="_id('file-input').click()"><input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFile(event)" style="display:none;" multiple><p style="font-size:24px;">📁</p><p>拖拽 Excel/CSV 文件到此处<br>或点击选择文件</p><p style="font-size:11px;color:#888;">支持 .xlsx .xls .csv</p></div><div id="file-list"></div></div>`;
-    renderFileList();
+    el.innerHTML+=`<div class="card"><h3>📊 上传数据文件</h3><p style="color:#888;font-size:12px;margin-bottom:8px;">支持 Excel (.xlsx .xls) 和 CSV 文件。点击或拖拽上传。</p><div class="upload-zone" id="drop-zone" ondrop="return handleDrop(event)" ondragover="event.preventDefault();this.style.borderColor='#2e86c1'" ondragleave="this.style.borderColor=''" onclick="document.getElementById('file-input').click()"><input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFile(event)" style="display:none" multiple><p style="font-size:30px;">📁</p><p><b>点击选择文件</b> 或拖拽到此处</p><p style="font-size:11px;color:#888;">支持 .xlsx .xls .csv</p></div><div id="file-list"></div></div>`;
+    setTimeout(renderFileList,100);
   }else if(active==='chart'){
-    el.innerHTML+=`<div class="card"><h3>📈 从数据生成图表</h3><label>选择数据表</label><select id="chart-table">${Object.keys(S.dataTables).map(k=>`<option value="${k}">${k}</option>`).join('')||'<option>请先上传数据</option>'}</select><div class="fr" style="margin-top:8px;"><div class="fg"><label>图表类型</label><select id="chart-type"><option>bar</option><option>line</option><option>pie</option><option>scatter</option><option>radar</option></select></div><div class="fg"><label>X轴列名</label><input id="chart-x"></div><div class="fg"><label>Y轴列名</label><input id="chart-y"></div></div><button class="btn btn-primary" onclick="renderChart()">📈 生成图表</button><div id="chart-preview" style="margin-top:12px;"></div></div>`;
+    el.innerHTML+=`<div class="card"><h3>📈 从上传数据生成图表</h3>${Object.keys(S.dataTables).length>0?`<div class="fr"><div class="fg"><label>数据表</label><select id="chart-table">${Object.keys(S.dataTables).map(k=>`<option>${k}</option>`).join('')}</select></div><div class="fg"><label>图表类型</label><select id="chart-type"><option>bar</option><option>line</option><option>pie</option><option>scatter</option></select></div></div><div class="fr"><div class="fg"><label>X轴列名</label><input id="chart-x" placeholder="列名"></div><div class="fg"><label>Y轴列名</label><input id="chart-y" placeholder="列名"></div></div><button class="btn btn-primary" onclick="renderChart()">📈 生成图表</button><div id="chart-preview" style="margin-top:12px;"></div>`:'<p style="color:#888;">请先在「上传Excel/CSV」标签页上传数据文件</p>'}</div>`;
+  }else if(active==='image'){
+    el.innerHTML+=`<div class="card"><h3>🖼️ 上传图片</h3><p style="color:#888;font-size:12px;margin-bottom:8px;">上传数据分析结果的截图、流程图等。图片会嵌入到论文相应位置。</p><div class="upload-zone" ondrop="return handleImageDrop(event)" ondragover="event.preventDefault()" onclick="document.getElementById('img-input').click()"><input type="file" id="img-input" accept="image/*" onchange="handleImageUpload(event)" style="display:none" multiple><p style="font-size:30px;">🖼️</p><p><b>点击选择图片</b> 或拖拽到此处</p><p style="font-size:11px;color:#888;">支持 .png .jpg .gif .webp</p></div><div id="img-list"></div></div>`;
+    setTimeout(renderImageList,100);
   }
 
   // 数据摘要
-  if(Object.keys(S.dataTables).length>0||Object.keys(S.dataCharts).length>0||S.uploadedFiles.length>0){
-    el.innerHTML+=`<div class="card"><h3>📋 数据摘要</h3>${S.uploadedFiles.map(f=>`<p>📎 ${f.name} (${f.rows}行×${f.cols}列) <button class="btn btn-sm btn-outline" onclick="insertTableRef('${f.name}')">插入论文</button></p>`).join('')}${Object.keys(S.dataCharts).map(k=>`<p>📈 图表: ${k} <button class="btn btn-sm btn-outline" onclick="insertChartRef('${k}')">插入论文</button></p>`).join('')}</div>`;
+  if(Object.keys(S.dataTables).length>0||Object.keys(S.dataCharts).length>0||S.uploadedImages.length>0){
+    el.innerHTML+=`<div class="card"><h3>📋 数据摘要（在写作中使用）</h3>${S.uploadedFiles.map(f=>`<p>📎 <b>${f.name}</b> (${f.rows}行×${f.cols}列) — 在写作中引用: <code>[TABLE:${f.key}]</code> <button class="btn btn-sm btn-outline" onclick="navigator.clipboard.writeText('[TABLE:${f.key}]');toast('已复制引用标记','info')">📋 复制</button></p>`).join('')}${Object.keys(S.dataCharts).map(k=>`<p>📈 <b>${k}</b> — 在写作中引用: <code>[CHART:${k}]</code></p>`).join('')}${S.uploadedImages.map((img,i)=>`<p>🖼️ <b>${img.name}</b> — 在写作中引用: <code>[IMAGE:${img.name}]</code></p>`).join('')}</div>`;
   }
 }
 
-function handleFile(evt){let files=evt.target.files;for(let f of files)parseFile(f)}
-function handleDrop(evt){evt.preventDefault();let files=evt.dataTransfer.files;for(let f of files)parseFile(f)}
+function handleFile(evt){
+  let files=evt.target.files;if(!files||files.length===0)return;
+  for(let f of files)parseFile(f);evt.target.value='';
+}
+function handleDrop(evt){
+  evt.preventDefault();evt.currentTarget.style.borderColor='';
+  let files=evt.dataTransfer.files;if(!files||files.length===0)return;
+  for(let f of files)parseFile(f);return false;
+}
 function parseFile(file){
   let name=file.name,ext=name.split('.').pop().toLowerCase();
-  if(!['xlsx','xls','csv'].includes(ext)){toast('仅支持 .xlsx .xls .csv','error');return}
+  if(!['xlsx','xls','csv'].includes(ext)){toast(name+' 仅支持 .xlsx .xls .csv','error');return}
+  toast('正在解析 '+name+'...','info');
   let reader=new FileReader();
   reader.onload=function(e){
     try{
-      let wb=XLSX.read(e.target.result,{type:'array'}),sheet=wb.SheetNames[0];
-      let data=XLSX.utils.sheet_to_json(wb.Sheets[sheet],{header:1});
-      if(data.length===0){toast('文件为空','error');return}
-      let headers=data[0],rows=data.slice(1).filter(r=>r.some(c=>c!==undefined&&c!==null&&c!==''));
-      let key=name.replace(/\.[^.]+$/,'');
+      let wb,data;
+      if(ext==='csv'){
+        let text=new TextDecoder().decode(e.target.result);
+        data=text.split('\n').filter(l=>l.trim()).map(l=>l.split(',').map(c=>c.trim().replace(/^"|"$/g,'')));
+      }else{
+        wb=XLSX.read(e.target.result,{type:'array'});let sn=wb.SheetNames[0];
+        data=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1});
+      }
+      if(!data||data.length===0){toast(name+' 为空','error');return}
+      let headers=(data[0]||[]).map((h,i)=>h!==undefined&&h!==null&&h!==''?String(h):'列'+(i+1));
+      let rows=data.slice(1).filter(r=>r&&r.some(c=>c!==undefined&&c!==null&&c!==''));
+      let key=name.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9一-鿿_-]/g,'_');
       S.dataTables[key]={headers:headers,rows:rows,name:name};
+      S.uploadedFiles=S.uploadedFiles.filter(f=>f.key!==key);
       S.uploadedFiles.push({name:name,rows:rows.length,cols:headers.length,key:key});
-      save();toast(`✅ ${name} 已加载 (${rows.length}行×${headers.length}列)`,'success');
-      renderFileList();
-    }catch(ex){toast('解析失败: '+ex.message,'error')}
+      save();toast(`✅ ${name} (${rows.length}行×${headers.length}列)`,'success');renderFileList();
+    }catch(ex){toast(name+' 解析失败: '+ex.message,'error')}
   };
-  reader.readAsArrayBuffer(file);
+  if(ext==='csv')reader.readAsArrayBuffer(file);else reader.readAsArrayBuffer(file);
 }
 function renderFileList(){
   let el=_id('file-list');if(!el)return;
-  if(S.uploadedFiles.length===0){el.innerHTML='';return}
-  el.innerHTML=S.uploadedFiles.map((f,i)=>`<div class="card" style="padding:12px;margin:8px 0;"><b>📎 ${f.name}</b> (${f.rows}行×${f.cols}列)<div style="max-height:300px;overflow:auto;margin-top:8px;"><table class="data-table"><tr>${S.dataTables[f.key].headers.map(h=>`<th>${h||''}</th>`).join('')}</tr>${S.dataTables[f.key].rows.slice(0,50).map(r=>`<tr>${r.map(c=>`<td>${c??''}</td>`).join('')}</tr>`).join('')}</table>${S.dataTables[f.key].rows.length>50?`<p style="color:#888;font-size:11px;">仅显示前50行，共${S.dataTables[f.key].rows.length}行</p>`:''}</div><button class="btn btn-sm btn-danger" onclick="removeFile(${i})">删除</button></div>`).join('');
+  if(S.uploadedFiles.length===0){el.innerHTML='<p style="color:#888;margin-top:8px;">暂无上传文件</p>';return}
+  el.innerHTML=S.uploadedFiles.map((f,i)=>`<div class="card" style="padding:12px;margin:8px 0;"><div style="display:flex;justify-content:space-between;align-items:center;"><b>📎 ${_esc(f.name)}</b> <span style="color:#888;font-size:12px;">${f.rows}行×${f.cols}列</span></div><div style="max-height:300px;overflow:auto;margin-top:8px;"><table class="data-table"><thead><tr>${(S.dataTables[f.key]?.headers||[]).map(h=>`<th>${_esc(String(h||''))}</th>`).join('')}</tr></thead><tbody>${(S.dataTables[f.key]?.rows||[]).slice(0,100).map(r=>`<tr>${r.map(c=>`<td>${_esc(c??'')}</td>`).join('')}</tr>`).join('')}</tbody></table>${(S.dataTables[f.key]?.rows||[]).length>100?`<p style="color:#888;font-size:11px;margin-top:4px;">显示前100行，共${S.dataTables[f.key].rows.length}行</p>`:''}</div><div style="margin-top:6px;display:flex;gap:6px;"><button class="btn btn-sm btn-outline" onclick="navigator.clipboard.writeText('[TABLE:${f.key}]');toast('已复制 [TABLE:${f.key}]','info')">📋 复制引用标记</button><button class="btn btn-sm btn-danger" onclick="if(confirm('确定删除?')){removeFile(${i})}">🗑️ 删除</button></div></div>`).join('');
 }
-function removeFile(i){let f=S.uploadedFiles[i];delete S.dataTables[f.key];S.uploadedFiles.splice(i,1);save();renderFileList()}
-function insertTableRef(name){toast(`✅ 在写作中引用: [TABLE:${name}]`,'info')}
-function insertChartRef(name){toast(`✅ 在写作中引用: [CHART:${name}]`,'info')}
+function removeFile(i){let f=S.uploadedFiles[i];if(f)delete S.dataTables[f.key];S.uploadedFiles.splice(i,1);save();renderFileList()}
 
+// 图片上传
+function handleImageUpload(evt){let files=evt.target.files;if(!files)return;for(let f of files)addImage(f);evt.target.value=''}
+function handleImageDrop(evt){evt.preventDefault();let files=evt.dataTransfer.files;for(let f of files)addImage(f);return false}
+function addImage(file){
+  if(!file.type.startsWith('image/')){toast('仅支持图片文件','error');return}
+  let reader=new FileReader();
+  reader.onload=function(e){
+    S.uploadedImages.push({name:file.name,data:e.target.result,size:file.size,time:new Date().toISOString()});
+    save();renderImageList();toast(`✅ ${file.name} 已上传`,'success');
+  };
+  reader.readAsDataURL(file);
+}
+function renderImageList(){
+  let el=_id('img-list');if(!el)return;
+  if(S.uploadedImages.length===0){el.innerHTML='<p style="color:#888;margin-top:8px;">暂无上传图片</p>';return}
+  el.innerHTML=S.uploadedImages.map((img,i)=>`<div class="card" style="padding:12px;margin:8px 0;display:flex;gap:12px;align-items:start;"><img src="${img.data}" style="max-width:150px;max-height:150px;border-radius:6px;"><div style="flex:1;"><b>🖼️ ${_esc(img.name)}</b><p style="font-size:11px;color:#888;">${(img.size/1024).toFixed(1)}KB</p><code style="font-size:12px;">[IMAGE:${img.name}]</code><br><button class="btn btn-sm btn-outline" style="margin-top:4px;" onclick="navigator.clipboard.writeText('[IMAGE:${img.name}]');toast('已复制','info')">📋 复制引用</button><button class="btn btn-sm btn-danger" onclick="S.uploadedImages.splice(${i},1);save();renderImageList()">删除</button></div></div>`).join('');
+}
+
+// 图表
 function renderChart(){
   let tn=_id('chart-table')?.value,x=_id('chart-x')?.value,y=_id('chart-y')?.value,type=_id('chart-type')?.value;
-  if(!tn||!x||!y||!S.dataTables[tn]){toast('请选择数据表和列','error');return}
+  if(!tn||!x||!y||!S.dataTables[tn]){toast('请完整填写','error');return}
   let dt=S.dataTables[tn],xi=dt.headers.indexOf(x),yi=dt.headers.indexOf(y);
-  if(xi<0||yi<0){toast('列名未找到，可用: '+dt.headers.filter(h=>h).join(', '),'error');return}
+  if(xi<0||yi<0){toast('列名未找到。可用: '+dt.headers.filter(h=>h).join(', '),'error');return}
   let labels=dt.rows.map(r=>r[xi]),values=dt.rows.map(r=>parseFloat(r[yi])||0);
-  let chartName=`${tn}_${y}`;
-  let canvasId='chart-'+Date.now();
-  _id('chart-preview').innerHTML=`<canvas id="${canvasId}" width="400" height="250"></canvas><p>${x} vs ${y}</p><button class="btn btn-sm btn-primary" onclick="saveChart('${chartName}','${canvasId}','${type}')">💾 保存图表</button>`;
-  let ctx=_id(canvasId).getContext('2d');
-  new Chart(ctx,{type:type,data:{labels:labels,datasets:[{label:y,data:values,backgroundColor:'rgba(46,134,193,0.5)',borderColor:'#2e86c1',borderWidth:1}]}});
+  let cid='chart-'+Date.now(),cn=`${tn}_${y}`;
+  _id('chart-preview').innerHTML=`<canvas id="${cid}" width="400" height="250"></canvas><p style="text-align:center;font-size:12px;color:#888;">${x} vs ${y}</p><button class="btn btn-sm btn-primary" onclick="saveChart('${cn}','${cid}','${type}')">💾 保存图表</button>`;
+  new Chart(_id(cid),{type:type,data:{labels,datasets:[{label:y,data:values,backgroundColor:'rgba(46,134,193,.5)',borderColor:'#2e86c1',borderWidth:1}]}});
 }
-function saveChart(name,canvasId,type){
-  let canvas=_id(canvasId);
-  S.dataCharts[name]={image:canvas.toDataURL(),type:type,created:new Date().toISOString()};
-  save();toast(`✅ 图表已保存`,'success');renderPage('data');
+function saveChart(name,cid,type){
+  S.dataCharts[name]={image:_id(cid).toDataURL(),type:type,created:new Date().toISOString()};
+  save();toast(`✅ 图表已保存 — 写作中用 [CHART:${name}] 引用`,'success');renderPage('data');
 }
 
-// ==================== 大纲生成 ====================
+// ==================== 大纲 ====================
 function renderOutline(el){if(!S.apiKey){el.innerHTML='<div class="card"><p>请先设置API密钥</p></div>';return}let items=S.outline;el.innerHTML=`<h2>📑 论文大纲</h2>${items.length>0?`<div class="card"><div class="stats"><div class="stat"><div class="v">${items.length}</div><div class="l">章节数</div></div><div class="stat"><div class="v">${items.reduce((s,i)=>s+(i.word_target||0),0).toLocaleString()}</div><div class="l">目标字数</div></div></div></div>`:''}<div class="card">${items.length>0?items.map((s,i)=>`<div class="fr" style="margin:3px 0;align-items:center;background:#f8f9fa;padding:4px 8px;border-radius:4px;"><span style="color:#888;font-size:12px;min-width:22px">${i+1}.</span><input value="${_esc(s.title)}" onchange="S.outline[${i}].title=this.value;save()" style="flex:4;padding:4px 6px;font-size:12px;"><input type="number" value="${s.word_target}" onchange="S.outline[${i}].word_target=+this.value;save()" style="flex:1;min-width:60px;padding:4px 6px;font-size:12px;" min="100"><span style="font-size:11px;color:#888;min-width:50px">${s.type||'chapter'}</span></div>`).join(''):'<p style="color:#888;">点击下方按钮用AI生成大纲</p>'}<div style="margin-top:10px;display:flex;gap:8px;"><button class="btn btn-primary" onclick="genOutline()" ${!S.networkOk?'disabled':''}>🤖 AI生成大纲</button>${items.length>0?'<button class="btn btn-outline" onclick="S.outline=[];save();renderPage(\'outline\');">清空</button>':''}</div><div id="out-st" style="margin-top:8px;font-size:13px;"></div></div>`}
-async function genOutline(){let st=_id('out-st');st.textContent='⏳ 生成中...';try{let full='';for await(let c of dsStream('你是毕业论文指导教师。请根据标题生成标准大纲。每行格式: 类型|标题|字数。类型为chapter或section。',`标题: ${S.metadata.title}\n类型: ${THESIS_TYPES[S.thesisType].name}\n目标: ${THESIS_TYPES[S.thesisType].words}字\n作者: ${S.metadata.author}\n请生成完整大纲。`)){full+=c;st.textContent=full.slice(-200)}let o=full.split('\n').filter(l=>l.includes('|')).map((l,i)=>{let p=l.split('|').map(x=>x.trim());return{title:p[1]||p[0],word_target:parseInt(p[2])||1000,type:(p[0]||'').includes('chapter')||(p[0]||'').includes('章')?'chapter':'section',content:'',word_count:0,status:'pending'}});if(o.length===0){o=[{title:'第一章 绪论',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'1.1 研究背景与意义',word_target:1000,type:'section',content:'',word_count:0,status:'pending'},{title:'1.2 国内外研究现状',word_target:1200,type:'section',content:'',word_count:0,status:'pending'},{title:'1.3 研究内容与方法',word_target:800,type:'section',content:'',word_count:0,status:'pending'},{title:'第二章 相关理论与技术',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第三章 设计与实现',word_target:4000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第四章 结果与分析',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第五章 总结与展望',word_target:1500,type:'chapter',content:'',word_count:0,status:'pending'}]}S.outline=o;save();st.textContent=`✅ 完成！${o.length}个章节`;renderPage('outline')}catch(e){st.textContent='失败: '+e.message}}
+async function genOutline(){let st=_id('out-st');st.textContent='⏳ 生成中...';try{let full='';for await(let c of dsStream('你是毕业论文指导教师。请根据标题生成标准大纲。每行格式: 类型|标题|字数。类型为chapter或section。',`标题: ${S.metadata.title}\n类型: ${THESIS_TYPES[S.thesisType].name}\n目标: ${THESIS_TYPES[S.thesisType].words}字\n请生成完整大纲。`)){full+=c;st.textContent=full.slice(-200)}let o=full.split('\n').filter(l=>l.includes('|')).map((l,i)=>{let p=l.split('|').map(x=>x.trim());return{title:p[1]||p[0],word_target:parseInt(p[2])||1000,type:(p[0]||'').includes('chapter')||(p[0]||'').includes('章')?'chapter':'section',content:'',word_count:0,status:'pending'}});if(o.length===0){o=[{title:'第一章 绪论',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'1.1 研究背景与意义',word_target:1000,type:'section',content:'',word_count:0,status:'pending'},{title:'1.2 国内外研究现状',word_target:1200,type:'section',content:'',word_count:0,status:'pending'},{title:'1.3 研究内容与方法',word_target:800,type:'section',content:'',word_count:0,status:'pending'},{title:'第二章 相关理论与技术',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第三章 设计与实现',word_target:4000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第四章 结果与分析',word_target:3000,type:'chapter',content:'',word_count:0,status:'pending'},{title:'第五章 总结与展望',word_target:1500,type:'chapter',content:'',word_count:0,status:'pending'}]}S.outline=o;save();st.textContent=`✅ 完成！${o.length}个章节`;renderPage('outline')}catch(e){st.textContent='失败: '+e.message}}
 
-// ==================== 逐节写作 ====================
-function renderWriting(el){if(!S.apiKey||S.outline.length===0){el.innerHTML='<div class="card"><p>请先生成大纲并设置API密钥</p></div>';return}let secs=S.outline,idx=Math.min(S.currentSectionIdx,secs.length-1),sec=secs[idx]||secs[0],w=secs.filter(s=>s.content&&s.content.trim()),tw=w.reduce((s,i)=>s+(i.word_count||0),0),tt=secs.reduce((s,i)=>s+(i.word_target||0),0);el.innerHTML=`<h2>✍️ 逐节写作</h2><div class="card"><div class="stats"><div class="stat"><div class="v">${w.length}/${secs.length}</div><div class="l">章节进度</div></div><div class="stat"><div class="v">${tw.toLocaleString()}</div><div class="l">已写字数</div></div><div class="stat"><div class="v">${tt.toLocaleString()}</div><div class="l">目标字数</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:${secs.length>0?w.length/secs.length*100:0}%"></div></div></div><div class="card"><div class="fg"><label>选择章节</label><select onchange="S.currentSectionIdx=+this.value;save();renderPage('writing')">${secs.map((s,i)=>`<option value="${i}" ${i===idx?'selected':''}>${s.content?'✅':''} ${_esc(s.title)} (${(s.word_count||0).toLocaleString()}/${(s.word_target||0).toLocaleString()}字)</option>`).join('')}</select></div><h3>${_esc(sec.title)} <span style="color:#888;font-size:12px;">目标 ${(sec.word_target||1000).toLocaleString()} 字</span></h3>${sec.content?`<details style="margin:8px 0;"><summary>已有内容 (${(sec.word_count||0).toLocaleString()}字)</summary><div class="writing-content">${sec.content}</div></details>`:''}<div class="fg"><label>💬 修改意见（可选）</label><textarea id="wfb" placeholder="例如：加入更多定量分析，引用数据表格..."></textarea></div><button class="btn btn-primary" onclick="genSection(${idx})" ${!S.networkOk?'disabled':''}>🤖 AI生成本节</button>${sec.content?`<button class="btn btn-success" style="margin-left:6px;" onclick="S.outline[${idx}].status='written';save();toast('✅ 已确认','success');renderPage('writing')">✅ 确认完成</button>`:''}<div id="wout" style="margin-top:10px;"></div></div>`}
+// ==================== 逐节写作（含数据表格和图片引用） ====================
+function renderWriting(el){if(!S.apiKey||S.outline.length===0){el.innerHTML='<div class="card"><p>请先生成大纲并设置API密钥</p></div>';return}let secs=S.outline,idx=Math.min(S.currentSectionIdx,secs.length-1),sec=secs[idx]||secs[0],w=secs.filter(s=>s.content&&s.content.trim()),tw=w.reduce((s,i)=>s+(i.word_count||0),0),tt=secs.reduce((s,i)=>s+(i.word_target||0),0);el.innerHTML=`<h2>✍️ 逐节写作</h2><div class="card"><div class="stats"><div class="stat"><div class="v">${w.length}/${secs.length}</div><div class="l">进度</div></div><div class="stat"><div class="v">${tw.toLocaleString()}</div><div class="l">已写</div></div><div class="stat"><div class="v">${tt.toLocaleString()}</div><div class="l">目标</div></div><div class="stat"><div class="v">${Object.keys(S.dataTables).length}</div><div class="l">数据表</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:${secs.length>0?w.length/secs.length*100:0}%"></div></div></div><div class="card"><div class="fg"><label>选择章节</label><select onchange="S.currentSectionIdx=+this.value;save();renderPage('writing')">${secs.map((s,i)=>`<option value="${i}" ${i===idx?'selected':''}>${s.content?'✅':''} ${_esc(s.title)} (${(s.word_count||0).toLocaleString()}/${(s.word_target||0).toLocaleString()}字)</option>`).join('')}</select></div><h3>${_esc(sec.title)} <span style="color:#888;font-size:12px;">目标 ${(sec.word_target||1000).toLocaleString()} 字</span></h3>${sec.content?`<details style="margin:8px 0;"><summary>已有内容</summary><div class="writing-content">${sec.content}</div></details>`:''}<div class="fg"><label>💬 修改意见（可选）</label><textarea id="wfb" placeholder="例如：加入定量分析，引用 [TABLE:数据表名]..."></textarea></div><button class="btn btn-primary" onclick="genSection(${idx})" ${!S.networkOk?'disabled':''}>🤖 AI生成本节</button>${sec.content?`<button class="btn btn-success" style="margin-left:6px;" onclick="S.outline[${idx}].status='written';save();toast('✅ 已确认','success');renderPage('writing')">✅ 确认完成</button>`:''}<div id="wout" style="margin-top:10px;"></div></div>`}
 async function genSection(idx){
-  let sec=S.outline[idx],fb=_id('wfb')?.value||'',out=_id('wout'),dtCtx=buildDataContext();if(fb){S.feedbacks.push({time:new Date().toISOString(),section:sec.title,content:fb,status:'pending'});save()}out.innerHTML='<div class="writing-content">⏳ 生成中...</div>';
+  let sec=S.outline[idx],fb=_id('wfb')?.value||'',out=_id('wout');if(fb){S.feedbacks.push({time:new Date().toISOString(),section:sec.title,content:fb,status:'pending'});save()}out.innerHTML='<div class="writing-content">⏳ AI生成中...</div>';
+  let dtCtx='';for(let[k,v]of Object.entries(S.dataTables)){dtCtx+=`\n[TABLE:${k}] 列: ${v.headers.filter(h=>h).join(',')} (${v.rows.length}行)\n前3行: ${v.rows.slice(0,3).map(r=>r.join('|')).join('; ')}\n`}
+  let imgCtx='';S.uploadedImages.forEach(img=>{imgCtx+=`\n[IMAGE:${img.name}] 可用图片\n`});
+  let chartCtx='';Object.keys(S.dataCharts).forEach(k=>{chartCtx+=`\n[CHART:${k}] 可用图表\n`});
   let oc=S.outline.map(s=>`- ${s.title} (${s.word_target}字)`).join('\n'),pc=S.outline.slice(0,idx).filter(s=>s.content).map(s=>`[${s.title}] ${s.content.slice(0,300)}...`).join('\n');
-  let sys=`你是中文学术论文写作专家。撰写符合GB/T 7713标准的毕业论文。学术严谨，逻辑清晰，善用长短句，避免AI套话。用[N]标注引用，公式处用[FORMULA:N]，表格处用[TABLE:表名]，图表处用[CHART:图表名]。在适当位置标注需要插入数据表格和图表的标记。`;
-  let usr=`论文: ${S.metadata.title}\n章节: ${sec.title}\n目标: ${sec.word_target||1000}字\n【大纲】\n${oc}\n【前文】\n${pc||'(开头)'}\n${S.userData?'【数据描述】\n'+S.userData:''}\n${dtCtx?'【可用数据表格】\n'+dtCtx:''}\n${fb?'【修改意见】\n'+fb:''}\n请直接输出章节内容。`;
+  let sys=`你是中文学术论文写作专家。请撰写符合GB/T 7713标准的毕业论文。学术严谨，逻辑清晰，善用长短句。在适当位置标注引用标记：[TABLE:表名]、[CHART:图表名]、[IMAGE:图片名]、[FORMULA:N]。请基于提供的数据表格内容进行分析论述。`;
+  let usr=`论文: ${S.metadata.title}\n章节: ${sec.title}\n目标: ${sec.word_target||1000}字\n【大纲】${oc}\n【前文】${pc||'(开头)'}${S.userData?'\n【数据描述】'+S.userData:''}${dtCtx?'\n【数据表格】'+dtCtx:''}${imgCtx?'\n【图片】'+imgCtx:''}${chartCtx?'\n【图表】'+chartCtx:''}${fb?'\n【修改意见】'+fb:''}\n请直接输出章节内容。`;
   try{let full='';out.innerHTML='<div class="writing-content" id="wstream"></div>';let se=_id('wstream');for await(let c of dsStream(sys,usr)){full+=c;se.textContent=full;se.scrollTop=se.scrollHeight}S.outline[idx].content=full;S.outline[idx].word_count=full.length;S.outline[idx].status='writing';save();out.innerHTML=`<div class="writing-content">${full}</div><p style="color:green;margin-top:6px;">✅ ${full.length} 字</p>`}catch(e){out.innerHTML=`<p style="color:red;">失败: ${e.message}</p>`}
 }
-function buildDataContext(){let ctx='';for(let[k,v]of Object.entries(S.dataTables)){ctx+=`[TABLE:${k}] 包含列: ${v.headers.filter(h=>h).join(', ')}, 共${v.rows.length}行\n 前3行样本: ${v.rows.slice(0,3).map(r=>r.join('|')).join('; ')}\n`}return ctx}
 
-// ==================== 公式管理（增强版：自动识别 + KaTeX渲染） ====================
+// ==================== 公式管理（含自动识别） ====================
+const COMMON_FORMULAS=[
+  {name:'均值公式',latex:'\\bar{x}=\\frac{1}{n}\\sum_{i=1}^{n}x_i',pattern:/均值|平均数|\\bar\{x\}|\\mu|mean/g},
+  {name:'方差公式',latex:'s^2=\\frac{1}{n-1}\\sum_{i=1}^{n}(x_i-\\bar{x})^2',pattern:/方差|variance|s\^?2|σ\^?2/g},
+  {name:'标准差',latex:'s=\\sqrt{\\frac{1}{n-1}\\sum_{i=1}^{n}(x_i-\\bar{x})^2}',pattern:/标准差|SD/g},
+  {name:'t检验',latex:'t=\\frac{\\bar{x}-\\mu_0}{s/\\sqrt{n}}',pattern:/t.?检验|t.?test|t统计量|t\s*=/g},
+  {name:'卡方检验',latex:'\\chi^2=\\sum_{i=1}^{k}\\frac{(O_i-E_i)^2}{E_i}',pattern:/卡方|chi.?square|χ\^?2/g},
+  {name:'相关系数',latex:'r=\\frac{\\sum(x_i-\\bar{x})(y_i-\\bar{y})}{\\sqrt{\\sum(x_i-\\bar{x})^2\\sum(y_i-\\bar{y})^2}}',pattern:/相关系数|pearson|皮尔逊|r\s*=\s*0\.\d/g},
+  {name:'一元线性回归',latex:'y=\\beta_0+\\beta_1 x+\\varepsilon',pattern:/回归方程|线性回归|regression|β/g},
+  {name:'多元回归',latex:'y=\\beta_0+\\beta_1 x_1+\\beta_2 x_2+\\cdots+\\beta_k x_k+\\varepsilon',pattern:/多元回归|multiple regression/g},
+  {name:'正态分布',latex:'f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}',pattern:/正态分布|normal|高斯|gaussian/g},
+  {name:'二项分布',latex:'P(X=k)=\\binom{n}{k}p^k(1-p)^{n-k}',pattern:/二项分布|binomial/g},
+  {name:'泊松分布',latex:'P(X=k)=\\frac{\\lambda^k e^{-\\lambda}}{k!}',pattern:/泊松|poisson/g},
+  {name:'贝叶斯公式',latex:'P(A|B)=\\frac{P(B|A)P(A)}{P(B)}',pattern:/贝叶斯|bayes/g},
+  {name:'信息熵',latex:'H(X)=-\\sum_{i=1}^{n}p(x_i)\\log_2 p(x_i)',pattern:/熵|entropy/g},
+  {name:'欧拉公式',latex:'e^{i\\pi}+1=0',pattern:/欧拉|euler/g},
+  {name:'质能方程',latex:'E=mc^2',pattern:/质能|E=mc\^?2/g},
+  {name:'牛顿第二定律',latex:'F=ma',pattern:/牛顿|F=ma|力学/g},
+  {name:'勾股定理',latex:'a^2+b^2=c^2',pattern:/勾股|毕达哥拉斯|pythagorean/g},
+  {name:'增长率',latex:'r=\\frac{V_f-V_i}{V_i}\\times 100\\%',pattern:/增长率|growth rate/g},
+  {name:'样本量公式',latex:'n=\\frac{Z^2\\sigma^2}{E^2}',pattern:/样本量|sample size|n\s*=/g},
+  {name:'置信区间',latex:'CI=\\bar{x}\\pm z_{\\alpha/2}\\cdot\\frac{\\sigma}{\\sqrt{n}}',pattern:/置信区间|CI|confidence/g},
+];
 function renderFormulas(el){
   el.innerHTML=`<h2>📐 公式管理</h2>
-  <div class="card"><h3>➕ 手动添加</h3><div class="fr"><div class="fg"><label>LaTeX 公式</label><input id="flatex" placeholder="E=mc^2 或 \\frac{a}{b}"></div><div class="fg"><label>描述</label><input id="fdesc" placeholder="可选"></div></div><div class="fg"><label>所属章节</label><select id="fsec">${S.outline.map(s=>`<option>${_esc(s.title)}</option>`).join('')||'<option>全文</option>'}</select></div><button class="btn btn-outline btn-sm" onclick="previewF()">🔍 预览</button><button class="btn btn-primary btn-sm" onclick="saveF()">💾 保存</button><div id="fprev" style="margin-top:8px;text-align:center;padding:16px;background:#f9f9f9;border-radius:6px;min-height:30px;"></div></div>
-  <div class="card"><h3>🔍 从论文内容自动识别公式</h3><p style="color:#888;font-size:12px;margin-bottom:8px;">扫描已撰写章节中的数学表达，自动匹配标准公式</p><button class="btn btn-primary" onclick="autoDetectFormulas()">🔍 扫描识别</button><div id="auto-fm" style="margin-top:10px;"></div></div>
-  ${S.formulas.length>0?`<div class="card"><h3>已保存 (${S.formulas.length}个)</h3>${S.formulas.map((f,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px;"><span><b>[FORMULA:${i+1}]</b> ${_esc(f.latex)} <span style="color:#888;">${_esc(f.desc||'')}</span> <span id="fm-render-${i}" class="formula-highlight"></span></span><button class="btn btn-danger btn-sm" onclick="S.formulas.splice(${i},1);save();renderPage('formulas')">删除</button></div>`).join('')}</div>`:''}`;
-  // render saved formulas with KaTeX
-  setTimeout(()=>{S.formulas.forEach((f,i)=>{let e=_id('fm-render-'+i);if(e)try{katex.render(f.latex,e,{throwOnError:false})}catch(ex){}})},100);
+  <div class="card"><h3>➕ 手动添加</h3><div class="fr"><div class="fg"><label>LaTeX 公式</label><input id="flatex" placeholder="E=mc^2 或 \\frac{a}{b}"></div><div class="fg"><label>描述</label><input id="fdesc" placeholder="可选"></div></div><div class="fg"><label>所属章节</label><select id="fsec">${S.outline.map(s=>`<option>${_esc(s.title)}</option>`).join('')||'<option>全文</option>'}</select></div><div style="margin-top:6px;display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="previewF()">🔍 预览</button><button class="btn btn-primary btn-sm" onclick="saveF()">💾 保存</button></div><div id="fprev" style="margin-top:8px;text-align:center;padding:16px;background:#f9f9f9;border-radius:6px;min-height:30px;"></div></div>
+  <div class="card"><h3>🔍 自动识别公式</h3><p style="color:#888;font-size:12px;margin-bottom:8px;">扫描所有已撰写章节，自动匹配标准数学公式。支持中文数学术语和英文表达式。</p><button class="btn btn-primary" onclick="autoDetectFormulas()">🔍 扫描所有章节</button><div id="auto-fm" style="margin-top:10px;"></div></div>
+  ${S.formulas.length>0?`<div class="card"><h3>已保存公式 (${S.formulas.length}个)</h3>${S.formulas.map((f,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px;"><span><b>[FORMULA:${i+1}]</b> ${_esc(f.latex)} <span style="color:#888;">${_esc(f.desc||'')}</span> <span id="fm-render-${i}"></span></span><button class="btn btn-danger btn-sm" onclick="S.formulas.splice(${i},1);save();renderPage('formulas')">删除</button></div>`).join('')}</div>`:''}`;
+  setTimeout(()=>{S.formulas.forEach((f,i)=>{let e=_id('fm-render-'+i);if(e)try{katex.render(f.latex,e,{throwOnError:false})}catch(ex){}})},200);
 }
 function previewF(){let l=_id('flatex').value;if(!l)return;try{katex.render(l,_id('fprev'),{throwOnError:false,displayMode:true})}catch(e){_id('fprev').innerHTML=`<span style="color:red;">${e.message}</span>`}}
-function saveF(){let l=_id('flatex').value;if(!l)return;S.formulas.push({latex:l,desc:_id('fdesc').value,section:_id('fsec').value,order:S.formulas.length+1});save();toast(`✅ 已保存 [FORMULA:${S.formulas.length}]`,'success');renderPage('formulas')}
-
+function saveF(){let l=_id('flatex').value;if(!l)return;S.formulas.push({latex:l,desc:_id('fdesc').value,section:_id('fsec').value,order:S.formulas.length+1});save();toast(`✅ [FORMULA:${S.formulas.length}]`,'success');renderPage('formulas')}
 function autoDetectFormulas(){
-  let allText=S.outline.filter(s=>s.content).map(s=>s.content).join(' ');if(!allText){toast('没有已撰写的内容','error');return}
+  let allText=S.outline.filter(s=>s.content).map(s=>s.content).join(' ')+' '+S.userData;if(!allText.trim()){toast('没有已撰写的内容或数据描述','error');return}
   let found=[];
-  for(let f of COMMON_FORMULAS){
-    f.pattern.lastIndex=0;
-    if(f.pattern.test(allText)){found.push({latex:f.latex,name:f.name,count:(allText.match(f.pattern)||[]).length})}
-  }
-  // Also find p-value patterns
-  let pMatch=allText.match(/p\s*[<>=]\s*0\.\d+/gi);
-  if(pMatch){pMatch.forEach(m=>found.push({latex:m.replace(/\s/g,''),name:'P值检测',count:1}))}
-  // Find numbers with ±
-  let pmMatch=allText.match(/\d+\.?\d*\s*[±±]\s*\d+\.?\d*/g);
-  if(pmMatch){pmMatch.forEach(m=>found.push({latex:m,name:'均值±标准差',count:1}))}
+  for(let f of COMMON_FORMULAS){f.pattern.lastIndex=0;let matches=allText.match(f.pattern);if(matches&&matches.length>0){found.push({latex:f.latex,name:f.name,count:matches.length,examples:matches.slice(0,3)})}}
+  // P值
+  let pMatch=allText.match(/[pP]\s*[<>=]\s*0\.\d+/g);if(pMatch){let pv=[...new Set(pMatch)];pv.forEach(m=>found.push({latex:m.replace(/\s/g,''),name:'P值',count:1}))}
+  // ± 模式
+  let pmMatch=allText.match(/\d+\.?\d*\s*±\s*\d+\.?\d*/g);if(pmMatch){pmMatch.forEach(m=>found.push({latex:m,name:'均值±标准差',count:1}))}
+  // 分数
+  let fracMatch=allText.match(/\d+\/\d+/g);if(fracMatch){fracMatch.forEach(m=>{let[n,d]=m.split('/');found.push({latex:`\\frac{${n}}{${d}}`,name:'分数',count:1})})}
+  // 百分比
+  let pctMatch=allText.match(/\d+\.?\d*%/g);if(pctMatch){pctMatch.forEach(m=>{if(!found.some(f=>f.latex===m))found.push({latex:m,name:'百分比',count:1})})}
+  // R²
+  if(allText.match(/R\s*[²2]/gi))found.push({latex:'R^2=1-\\frac{SS_{res}}{SS_{tot}}',name:'R²决定系数',count:1});
 
-  // Dedup
-  let seen=new Set(),uniq=[];
-  for(let f of found){let k=f.latex;if(!seen.has(k)){seen.add(k);uniq.push(f)}}
-  if(uniq.length===0){_id('auto-fm').innerHTML='<p style="color:#888;">未检测到数学表达式</p>';return}
-  _id('auto-fm').innerHTML=`<p>检测到 <b>${uniq.length}</b> 个可能的公式:</p>${uniq.map((f,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:4px 0;"><span style="min-width:100px;color:#888;">${f.name}${f.count>1?' (×'+f.count+')':''}</span><span id="ad-fm-${i}" style="background:#fff3cd;padding:4px 8px;border-radius:4px;"></span><button class="btn btn-sm btn-primary" onclick="S.formulas.push({latex:'${f.latex.replace(/'/g,"\\'")}',desc:'${f.name}',section:'全文',order:S.formulas.length+1});save();toast('✅ 已添加','success')">+ 添加</button></div>`).join('')}`;
-  setTimeout(()=>{uniq.forEach((f,i)=>{let e=_id('ad-fm-'+i);if(e)try{katex.render(f.latex,e,{throwOnError:false})}catch(ex){}})},200);
+  let seen=new Set(),uniq=[];for(let f of found){let k=f.latex;if(!seen.has(k)){seen.add(k);uniq.push(f)}}
+  if(uniq.length===0){_id('auto-fm').innerHTML='<p style="color:#888;">未检测到数学表达式。在写作中加入"均值""方差""回归"等术语会触发识别。</p>';return}
+  _id('auto-fm').innerHTML=`<p>检测到 <b>${uniq.length}</b> 个公式:</p>${uniq.map((f,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:4px 0;flex-wrap:wrap;"><span style="min-width:100px;color:#888;font-size:12px;">${f.name}${f.count>1?' (×'+f.count+')':''}</span><span id="ad-fm-${i}" style="background:#fff3cd;padding:4px 8px;border-radius:4px;font-size:13px;"></span><button class="btn btn-sm btn-primary" onclick="addDetectedFormula('${f.latex.replace(/'/g,"\\'")}','${f.name}')">+ 添加</button>${f.examples?`<span style="font-size:11px;color:#999;">如: ${f.examples.join(', ')}</span>`:''}</div>`).join('')}`;
+  setTimeout(()=>{uniq.forEach((f,i)=>{let e=_id('ad-fm-'+i);if(e)try{katex.render(f.latex,e,{throwOnError:false})}catch(ex){}})},300);
 }
+function addDetectedFormula(latex,name){if(S.formulas.some(f=>f.latex===latex)){toast('已存在','info');return}S.formulas.push({latex,desc:name,section:'全文',order:S.formulas.length+1});save();toast(`✅ 已添加 ${name}`,'success');renderPage('formulas')}
 
 // ==================== 参考文献 ====================
-function renderReferences(el){el.innerHTML=`<h2>📚 参考文献管理</h2><div class="card"><h3>🔗 批量导入链接</h3><p style="color:#888;font-size:12px;">每行一个链接，用 | 分隔备注</p><textarea id="rlinks" style="height:120px;" placeholder="https://doi.org/10.1234/example | 重要参考">${_esc(S.referenceLinks)}</textarea><button class="btn btn-primary btn-sm" style="margin-top:6px;" onclick="importRefs()">📥 导入</button></div><div class="card"><h3>✍️ 手动添加</h3><div class="fr"><input id="rtext" placeholder="参考文献完整内容" style="flex:3"><select id="rtype" style="flex:1"><option>J</option><option>M</option><option>D</option><option>C</option><option>EB/OL</option></select><button class="btn btn-outline btn-sm" onclick="addRef()">添加</button></div></div>${S.references.length>0?`<div class="card"><h3>列表 (${S.references.length}条)</h3>${S.references.map((r,i)=>`<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:12px;"><b>[${i+1}]</b> ${_esc(r.text)} <span style="color:#888;">[${r.type}]</span><button class="btn btn-danger btn-sm" style="float:right;padding:2px 6px;font-size:11px;" onclick="S.references.splice(${i},1);save();renderPage('references')">删除</button></div>`).join('')}</div>`:''}`}
+function renderReferences(el){el.innerHTML=`<h2>📚 参考文献管理</h2><div class="card"><h3>🔗 批量导入链接</h3><p style="color:#888;font-size:12px;">每行一个链接，用 | 分隔备注</p><textarea id="rlinks" style="height:120px;" placeholder="https://doi.org/10.1234/example | 重要参考">${_esc(S.referenceLinks)}</textarea><button class="btn btn-primary btn-sm" style="margin-top:6px;" onclick="importRefs()">📥 导入</button></div><div class="card"><h3>✍️ 手动添加</h3><div class="fr"><input id="rtext" placeholder="参考文献完整内容" style="flex:3"><select id="rtype" style="flex:1"><option>J</option><option>M</option><option>D</option><option>C</option><option>EB/OL</option></select><button class="btn btn-outline btn-sm" onclick="addRef()">添加</button></div></div>${S.references.length>0?`<div class="card"><h3>列表 (${S.references.length}条)</h3>${S.references.map((r,i)=>`<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:12px;"><b>[${i+1}]</b> ${_esc(r.text)} <span style="color:#888;">[${r.type}]</span><button class="btn btn-danger btn-sm" style="float:right;" onclick="S.references.splice(${i},1);save();renderPage('references')">删除</button></div>`).join('')}</div>`:''}`}
 function importRefs(){let t=_id('rlinks').value;S.referenceLinks=t;if(!t)return;t.split('\n').filter(l=>l.trim()).forEach(l=>{let p=l.split('|').map(x=>x.trim());S.references.push({text:p[0],type:'EB/OL',note:p[1]||''})});save();toast('✅ 已导入','success');renderPage('references')}
 function addRef(){let t=_id('rtext').value;if(!t)return;S.references.push({text:t,type:_id('rtype').value,note:''});save();toast('✅ 已添加','success');renderPage('references')}
 
 // ==================== 意见反馈 ====================
-function renderFeedback(el){el.innerHTML=`<h2>💬 意见反馈</h2><div class="card"><h3>✍️ 提出新意见</h3><div class="fr"><div class="fg"><label>类型</label><select id="fbtype"><option>修改内容</option><option>调整风格</option><option>补充内容</option><option>删除内容</option><option>结构调整</option><option>其他</option></select></div><div class="fg"><label>章节</label><select id="fbsec">${S.outline.map(s=>`<option>${_esc(s.title)}</option>`).join('')||'<option>全文</option>'}</select></div></div><div class="fg"><label>具体意见</label><textarea id="fbcontent" placeholder="详细描述修改要求..."></textarea></div><button class="btn btn-primary" onclick="addFb()">📩 提交意见</button></div>${S.feedbacks.length>0?`<div class="card"><h3>📋 意见历史 (${S.feedbacks.length}条)</h3>${S.feedbacks.slice().reverse().map((f,i)=>`<div class="fb-item${f.status==='done'?' done':''}"><b>[${f.type||'意见'}]</b> → ${_esc(f.section||'')} | ${(f.time||'').slice(0,10)}<br>${_esc(f.content)}<br><span style="font-size:11px;color:#888;">状态: ${f.status==='done'?'✅已处理':'⏳待处理'}</span> ${f.status!=='done'?`<button class="btn btn-success btn-sm" onclick="S.feedbacks[S.feedbacks.length-1-${i}].status='done';save();renderPage('feedback')">标记已处理</button>`:''}</div>`).join('')}</div>`:'<div class="card"><p style="color:#888;">暂无意见记录</p></div>'}`}
+function renderFeedback(el){el.innerHTML=`<h2>💬 意见反馈</h2><div class="card"><h3>✍️ 新意见</h3><div class="fr"><div class="fg"><label>类型</label><select id="fbtype"><option>修改内容</option><option>调整风格</option><option>补充内容</option><option>删除内容</option><option>结构调整</option><option>其他</option></select></div><div class="fg"><label>章节</label><select id="fbsec">${S.outline.map(s=>`<option>${_esc(s.title)}</option>`).join('')||'<option>全文</option>'}</select></div></div><div class="fg"><label>具体意见</label><textarea id="fbcontent" placeholder="详细描述修改要求..."></textarea></div><button class="btn btn-primary" onclick="addFb()">📩 提交</button></div>${S.feedbacks.length>0?`<div class="card"><h3>📋 历史 (${S.feedbacks.length}条)</h3>${S.feedbacks.slice().reverse().map((f,i)=>`<div class="fb-item${f.status==='done'?' done':''}"><b>[${f.type||'意见'}]</b> → ${_esc(f.section||'')} | ${(f.time||'').slice(0,10)}<br>${_esc(f.content)}<br><span style="font-size:11px;color:#888;">${f.status==='done'?'✅已处理':'⏳待处理'}</span> ${f.status!=='done'?`<button class="btn btn-success btn-sm" onclick="S.feedbacks[S.feedbacks.length-1-${i}].status='done';save();renderPage('feedback')">标记处理</button>`:''}</div>`).join('')}</div>`:'<div class="card"><p style="color:#888;">暂无意见</p></div>'}`}
 function addFb(){let c=_id('fbcontent').value;if(!c.trim())return;S.feedbacks.push({type:_id('fbtype').value,section:_id('fbsec').value,content:c.trim(),time:new Date().toISOString(),status:'pending'});save();toast('✅ 已提交','success');renderPage('feedback')}
 
 // ==================== 去AI化 ====================
 let _dr=false;
-async function runDeAI(){if(_dr)return;_dr=true;let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){toast('没有已撰写的章节','error');_dr=false;return}let cfg=S.deaiCfg,enabled=Object.entries(cfg).filter(([,v])=>v);if(!enabled.length){toast('请至少选择一轮','error');_dr=false;return}let styles={pass1:{name:'学术结构化',desc:'使用正式学术论文语言，消除聊天机器人感。'},pass2:{name:'自然变化注入',desc:'混合长短句，段落长度变化，打破均匀节奏。'},pass3:{name:'个人视角',desc:'适当使用第一人称，加入研究者判断。'},pass4:{name:'具体化',desc:'替换模糊表述为具体数据。'},pass5:{name:'人类节奏',desc:'加入修辞问句和自然冗余。'}};let out=_id('daout');out.innerHTML='';for(let s of secs){out.innerHTML+=`<p>处理: <b>${_esc(s.title)}</b>...</p>`;let txt=s.content;for(let[k,_]of enabled){let st=styles[k];out.innerHTML+=`<p style="color:#888;font-size:12px;">→ ${st.name}...</p>`;try{let full='';for await(let c of dsStream(`请改写文本: ${st.desc}\n保留所有引用标记和公式标记。`,txt.slice(0,6000))){full+=c}if(full.trim())txt=full}catch(e){out.innerHTML+=`<p style="color:red;">${st.name}失败: ${e.message}</p>`}}s.content=txt;s.word_count=txt.length;s.deai_passes=(s.deai_passes||0)+enabled.length;out.innerHTML+=`<p style="color:green;">✅ ${_esc(s.title)} 完成</p>`}save();out.innerHTML+='<p style="color:green;font-weight:bold;">🎉 全部完成！</p>';_dr=false}
-function renderDeai(el){let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){el.innerHTML='<div class="card"><p>没有已撰写的章节</p></div>';return}let cfg=S.deaiCfg,nn={pass1:'学术结构化',pass2:'自然变化注入',pass3:'个人视角',pass4:'具体化',pass5:'人类节奏'};el.innerHTML=`<h2>🔄 去AI化</h2><div class="card"><h3>选择轮次</h3>${Object.entries(nn).map(([k,n],i)=>`<label style="display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;"><input type="checkbox" ${cfg[k]?'checked':''} onchange="S.deaiCfg['${k}']=this.checked;save()"> 第${i+1}轮: <b>${n}</b></label>`).join('')}<button class="btn btn-primary" style="margin-top:10px;" onclick="runDeAI()" ${_dr||!S.networkOk?'disabled':''}>🚀 开始 (${secs.length}章节)</button><div id="daout" style="margin-top:10px;font-size:13px;"></div></div>`}
+async function runDeAI(){if(_dr)return;_dr=true;let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){toast('无已撰写章节','error');_dr=false;return}let cfg=S.deaiCfg,enabled=Object.entries(cfg).filter(([,v])=>v);if(!enabled.length){_dr=false;return}let styles={pass1:{n:'学术结构化',d:'使用正式学术语言，消除聊天机器人感。'},pass2:{n:'自然变化',d:'混合长短句，段落长度变化，打破均匀节奏。'},pass3:{n:'个人视角',d:'适当使用第一人称。'},pass4:{n:'具体化',d:'替换模糊表述为具体数据。'},pass5:{n:'人类节奏',d:'加入修辞问句和自然冗余。'}};let out=_id('daout');out.innerHTML='';for(let s of secs){out.innerHTML+=`<p><b>${_esc(s.title)}</b>...</p>`;let txt=s.content;for(let[k,_]of enabled){let st=styles[k];out.innerHTML+=`<p style="color:#888;font-size:12px;">→ ${st.n}...</p>`;try{let full='';for await(let c of dsStream(`改写: ${st.d}\n保留标记。`,txt.slice(0,6000))){full+=c}if(full.trim())txt=full}catch(e){out.innerHTML+=`<p style="color:red;">${e.message}</p>`}}s.content=txt;s.word_count=txt.length;s.deai_passes=(s.deai_passes||0)+enabled.length;out.innerHTML+=`<p style="color:green;">✅ 完成</p>`}save();out.innerHTML+='<p style="color:green;font-weight:bold;">🎉 全部完成</p>';_dr=false}
+function renderDeai(el){let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){el.innerHTML='<div class="card"><p>无已撰写章节</p></div>';return}let cfg=S.deaiCfg,nn={pass1:'学术结构化',pass2:'自然变化',pass3:'个人视角',pass4:'具体化',pass5:'人类节奏'};el.innerHTML=`<h2>🔄 去AI化</h2><div class="card">${Object.entries(nn).map(([k,n],i)=>`<label style="display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;"><input type="checkbox" ${cfg[k]?'checked':''} onchange="S.deaiCfg['${k}']=this.checked;save()"> 第${i+1}轮: <b>${n}</b></label>`).join('')}<button class="btn btn-primary" style="margin-top:10px;" onclick="runDeAI()" ${_dr||!S.networkOk?'disabled':''}>🚀 开始 (${secs.length}章节)</button><div id="daout" style="margin-top:10px;font-size:13px;"></div></div>`}
 
-// ==================== 导出（含数据表格和图表） ====================
+// ==================== 导出（含数据表格、图片、图表） ====================
 async function doExport(){
-  let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){toast('没有已完成的章节','error');return}
-  let m=S.metadata,h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><style>body{font-family:SimSun,serif;font-size:12pt;line-height:1.5}h1{font-family:SimHei,sans-serif;font-size:22pt;text-align:center}h2{font-family:SimHei,sans-serif;font-size:16pt}h3{font-family:SimHei,sans-serif;font-size:14pt}p{text-indent:2em;margin:6pt 0}table{border-collapse:collapse;margin:8pt auto}td,th{border:1px solid #000;padding:4pt 8pt}@page{size:A4;margin:2.54cm 3.17cm}</style></head><body>`;
+  let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){toast('无已完成的章节','error');return}
+  let m=S.metadata,h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><style>body{font-family:SimSun,serif;font-size:12pt;line-height:1.5}h1{font-family:SimHei,sans-serif;font-size:22pt;text-align:center}h2{font-family:SimHei,sans-serif;font-size:16pt}h3{font-family:SimHei,sans-serif;font-size:14pt}p{text-indent:2em;margin:6pt 0}table{border-collapse:collapse;margin:8pt auto}td,th{border:1px solid #000;padding:4pt 8pt}img{max-width:480px}@page{size:A4;margin:2.54cm 3.17cm}</style></head><body>`;
   h+=`<br><br><br><br><h1>${m.title}</h1><br><p style="text-align:center">作者：${m.author}</p><p style="text-align:center">指导教师：${m.advisor}</p><p style="text-align:center">${m.university} | ${m.department}</p><p style="text-align:center">${new Date().toISOString().slice(0,7)}</p><br style="page-break-after:always">`;
   h+=`<h2>摘要</h2><p>（请在Word中补充摘要）</p><br style="page-break-after:always">`;
   for(let s of secs){h+=`<h2>${s.title}</h2>`;let paras=s.content.split('\n').filter(p=>p.trim());
     for(let p of paras){
-      // Replace TABLE markers with actual table data
-      let tm=p.match(/\[TABLE:([^\]]+)\]/);
+      let tm=p.match(/\[TABLE:([^\]]+)\]/),cm=p.match(/\[CHART:([^\]]+)\]/),im=p.match(/\[IMAGE:([^\]]+)\]/);
       if(tm&&S.dataTables[tm[1]]){
         h+=`<p>${p.replace(/\[TABLE:[^\]]+\]/,'')}</p>`;
         let dt=S.dataTables[tm[1]];h+=`<table><tr>${dt.headers.filter(x=>x).map(h=>`<th>${h}</th>`).join('')}</tr>${dt.rows.map(r=>`<tr>${r.map(c=>`<td>${c??''}</td>`).join('')}</tr>`).join('')}</table><p style="font-size:10pt;text-align:center;">表: ${tm[1]}</p>`;
-      }else h+=`<p>${p}</p>`;}
+      }else if(cm&&S.dataCharts[cm[1]]){
+        h+=`<p>${p.replace(/\[CHART:[^\]]+\]/,'')}</p><p style="text-align:center"><img src="${S.dataCharts[cm[1]].image}"></p><p style="font-size:10pt;text-align:center;">图: ${cm[1]}</p>`;
+      }else if(im){
+        let img=S.uploadedImages.find(x=>x.name===im[1]);
+        if(img){h+=`<p>${p.replace(/\[IMAGE:[^\]]+\]/,'')}</p><p style="text-align:center"><img src="${img.data}"></p><p style="font-size:10pt;text-align:center;">图: ${im[1]}</p>`}else h+=`<p>${p}</p>`;
+      }else h+=`<p>${p}</p>`;
+    }
     if(s!==secs[secs.length-1])h+=`<br style="page-break-after:always">`;
   }
   if(S.references.length>0){h+=`<br style="page-break-after:always"><h2>参考文献</h2>`;S.references.forEach((r,i)=>h+=`<p style="text-indent:0;font-size:10.5pt">[${i+1}] ${r.text}</p>`)}
   h+=`<br style="page-break-after:always"><h2>致谢</h2><p>本论文的完成离不开导师的悉心指导和同学们的热情帮助，在此表示衷心的感谢。</p></body></html>`;
-  let b=new Blob([h],{type:'application/msword'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=(m.title||'论文')+'.doc';a.click();URL.revokeObjectURL(u);toast('✅ 已导出','success')
+  let b=new Blob([h],{type:'application/msword'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=(m.title||'论文')+'.doc';a.click();URL.revokeObjectURL(u);toast('✅ 已导出，表格/图表/图片已嵌入','success')
 }
-function renderExport(el){let secs=S.outline,w=secs.filter(s=>s.content&&s.content.trim()),tw=w.reduce((s,i)=>s+(i.word_count||0),0);el.innerHTML=`<h2>📥 导出论文</h2><div class="card"><div class="stats"><div class="stat"><div class="v">${w.length}/${secs.length}</div><div class="l">章节</div></div><div class="stat"><div class="v">${tw.toLocaleString()}</div><div class="l">字数</div></div><div class="stat"><div class="v">${S.formulas.length}</div><div class="l">公式</div></div><div class="stat"><div class="v">${Object.keys(S.dataTables).length}</div><div class="l">数据表</div></div></div></div><div class="card"><h3>各章节</h3>${secs.map(s=>`<p>${s.content?'✅':''} ${_esc(s.title)} — ${(s.word_count||0).toLocaleString()}字 ${s.deai_passes?`| 去AI:${s.deai_passes}轮`:''}</p>`).join('')}</div>${w.length>0?`<div class="card"><button class="btn btn-primary" onclick="doExport()" style="font-size:15px;padding:10px 28px;">🎓 生成Word (.doc)</button><p style="color:#888;font-size:11px;margin-top:6px;">表格和数据自动嵌入论文相应位置</p></div>`:'<div class="card"><p>没有已完成的章节</p></div>'}`}
+function renderExport(el){let secs=S.outline,w=secs.filter(s=>s.content&&s.content.trim()),tw=w.reduce((s,i)=>s+(i.word_count||0),0);el.innerHTML=`<h2>📥 导出论文</h2><div class="card"><div class="stats"><div class="stat"><div class="v">${w.length}/${secs.length}</div><div class="l">章节</div></div><div class="stat"><div class="v">${tw.toLocaleString()}</div><div class="l">字数</div></div><div class="stat"><div class="v">${S.formulas.length}</div><div class="l">公式</div></div><div class="stat"><div class="v">${Object.keys(S.dataTables).length+S.uploadedImages.length}</div><div class="l">数据/图片</div></div></div></div><div class="card"><h3>各章节</h3>${secs.map(s=>`<p>${s.content?'✅':''} ${_esc(s.title)} — ${(s.word_count||0).toLocaleString()}字 ${s.deai_passes?`| 去AI:${s.deai_passes}轮`:''}</p>`).join('')}</div>${w.length>0?`<div class="card"><button class="btn btn-primary" onclick="doExport()" style="font-size:15px;padding:10px 28px;">🎓 生成Word (.doc)</button><p style="color:#888;font-size:11px;margin-top:6px;">表格、图表、上传的图片自动嵌入论文相应位置</p></div>`:'<div class="card"><p>无已完成的章节</p></div>'}`}
 
-// ==================== 初始化 ====================
+// ==================== 启动 ====================
 checkNet();renderSidebar();navigate(S.page||'home');
 </script>
 </body>
