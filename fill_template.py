@@ -32,8 +32,13 @@ class FillTemplateApp:
         self.tpl_lbl.pack(side=tk.LEFT, padx=10)
 
         f2 = ttk.Frame(self.root, padding=10); f2.pack(fill=tk.X)
-        ttk.Label(f2, text="2. 粘贴AI写作内容 (从网页复制):").pack(anchor="w")
-        self.content_input = scrolledtext.ScrolledText(self.root, height=14, font=("Microsoft YaHei", 11), wrap=tk.WORD)
+        ttk.Label(f2, text="2. 加载AI写作内容:").pack(anchor="w")
+        btn_frame = ttk.Frame(f2); btn_frame.pack(anchor="w")
+        ttk.Button(btn_frame, text="从网页JSON导入(推荐)", command=self.load_json).pack(side=tk.LEFT, padx=2)
+        ttk.Label(btn_frame, text="或粘贴文字:", foreground="gray").pack(side=tk.LEFT, padx=(10,2))
+        self.json_lbl = ttk.Label(f2, text="", foreground="green")
+        self.json_lbl.pack(anchor="w")
+        self.content_input = scrolledtext.ScrolledText(self.root, height=12, font=("Microsoft YaHei", 11), wrap=tk.WORD)
         self.content_input.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 5))
 
         f3 = ttk.Frame(self.root, padding=10); f3.pack(fill=tk.X)
@@ -60,6 +65,23 @@ class FillTemplateApp:
                 struct.append(f"{h}{p.text[:80]}")
         self.log.delete("1.0", tk.END)
         self.log.insert("1.0", f"模板结构 ({len(self.template_doc.paragraphs)}段):\n" + "\n".join(struct[:30]))
+
+    def load_json(self):
+        path = filedialog.askopenfilename(filetypes=[("JSON文件", "*.json"), ("所有文件", "*.*")])
+        if not path: return
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            sections = data.get("sections", [])
+            content = ""
+            for s in sections:
+                content += s.get("title", "") + "\n"
+                content += s.get("content", "") + "\n\n"
+            self.content_input.delete("1.0", tk.END)
+            self.content_input.insert("1.0", content)
+            self.json_lbl.config(text=f"已加载: {os.path.basename(path)} | {len(sections)}个章节")
+        except Exception as e:
+            messagebox.showerror("加载失败", f"JSON读取失败: {str(e)[:200]}")
 
     def fill(self):
         if not self.template_doc:

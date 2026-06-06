@@ -464,8 +464,17 @@ async function doExport(){
   h+=`<br style="page-break-after:always"><h2>致谢</h2><p>本论文的完成离不开导师的悉心指导和同学们的热情帮助，在此表示衷心的感谢。</p></body></html>`;
   let b=new Blob([h],{type:'application/msword'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=(m.title||'论文')+'.doc';a.click();URL.revokeObjectURL(u);toast('✅ 已导出，表格/图表/图片已嵌入','success')
 }
-function renderExport(el){let secs=S.outline,w=secs.filter(s=>s.content&&s.content.trim()),tw=w.reduce((s,i)=>s+(i.word_count||0),0);el.innerHTML=`<h2>📥 导出论文</h2><div class="card"><div class="stats"><div class="stat"><div class="v">${w.length}/${secs.length}</div><div class="l">章节</div></div><div class="stat"><div class="v">${tw.toLocaleString()}</div><div class="l">字数</div></div><div class="stat"><div class="v">${S.formulas.length}</div><div class="l">公式</div></div><div class="stat"><div class="v">${Object.keys(S.dataTables).length+S.uploadedImages.length}</div><div class="l">数据/图片</div></div></div></div><div class="card"><h3>各章节</h3>${secs.map(s=>`<p>${s.content?'✅':''} ${_esc(s.title)} — ${(s.word_count||0).toLocaleString()}字 ${s.deai_passes?`| 去AI:${s.deai_passes}轮`:''}</p>`).join('')}</div>${w.length>0?`<div class="card"><button class="btn btn-primary" onclick="doExport()" style="font-size:15px;padding:10px 28px;">🎓 生成Word (.doc)</button><p style="color:#888;font-size:11px;margin-top:6px;">表格、图表、上传的图片自动嵌入论文相应位置</p></div>`:'<div class="card"><p>无已完成的章节</p></div>'}`}
+function renderExport(el){let secs=S.outline,w=secs.filter(s=>s.content&&s.content.trim()),tw=w.reduce((s,i)=>s+(i.word_count||0),0);el.innerHTML=`<h2>📥 导出论文</h2><div class="card"><div class="stats"><div class="stat"><div class="v">${w.length}/${secs.length}</div><div class="l">章节</div></div><div class="stat"><div class="v">${tw.toLocaleString()}</div><div class="l">字数</div></div><div class="stat"><div class="v">${S.formulas.length}</div><div class="l">公式</div></div><div class="stat"><div class="v">${Object.keys(S.dataTables).length+S.uploadedImages.length}</div><div class="l">数据/图片</div></div></div></div><div class="card"><h3>各章节</h3>${secs.map(s=>`<p>${s.content?'✅':''} ${_esc(s.title)} — ${(s.word_count||0).toLocaleString()}字 ${s.deai_passes?`| 去AI:${s.deai_passes}轮`:''}</p>`).join('')}</div>${w.length>0?`<div class="card"><button class="btn btn-primary" onclick="doExport()" style="font-size:15px;padding:10px 28px;">🎓 生成Word (.doc)</button><button class="btn btn-success" onclick="exportForTemplate()" style="font-size:15px;padding:10px 28px;margin-left:8px;">📋 导出JSON供模板填充</button><p style="color:#888;font-size:11px;margin-top:6px;">JSON文件配合 fill_template.py 使用，排版100%不变</p></div>`:'<div class="card"><p>无已完成的章节</p></div>'}`}
 
+function exportForTemplate(){
+  let secs=S.outline.filter(s=>s.content&&s.content.trim());
+  if(!secs.length){toast('无已完成的章节','error');return}
+  let data={metadata:S.metadata,thesisType:S.thesisType,sections:secs.map(s=>({title:s.title,content:s.content})),references:S.references,formulas:S.formulas,school_template:S.schoolTemplate||null};
+  let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  let a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(S.metadata.title||'thesis')+'_template.json';a.click();
+  URL.revokeObjectURL(a.href);toast('✅ JSON已下载，用fill_template.py打开','success');
+}
 // ==================== 启动 ====================
 checkNet();renderSidebar();navigate(S.page||'home');
 </script>
