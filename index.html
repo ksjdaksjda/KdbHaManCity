@@ -354,8 +354,7 @@ function renderDeai(el){let secs=S.outline.filter(s=>s.content&&s.content.trim()
 
 // ==================== 论文修改（成品论文导入+AI重构） ====================
 function renderRevise(el){
-  el.innerHTML=`<h2>📝 成品论文修改</h2><p style="color:#888;margin-bottom:14px;">粘贴已有论文或上传Word文件，AI根据模板帮你调整格式、结构、语言</p><div style="background:#fef9e7;border:1px solid #f9e79f;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;">💡 <b>本地工具(需Python) - 双击run.bat:</b> <a href="run.bat" download>run.bat</a> | <a href="template_analyzer.py" download>分析器</a> | <a href="word_reviser.py" download>重写器</a> | <a href="fill_template.py" download>填充器</a></div>
-  <div class="card"><h3>📄 导入论文</h3>
+  el.innerHTML=`<h2>📝 成品论文修改</h2><p style="color:#888;margin-bottom:14px;">粘贴已有论文或上传Word文件，AI根据模板帮你调整格式、结构、语言</p>  <div class="card"><h3>📄 导入论文</h3>
     <div class="tab-nav"><span class="active" onclick="this.parentElement.querySelectorAll('span').forEach(s=>s.classList.remove('active'));this.classList.add('active');_id('revise-text-tab').style.display='block';_id('revise-file-tab').style.display='none'">📝 粘贴文本</span><span onclick="this.parentElement.querySelectorAll('span').forEach(s=>s.classList.remove('active'));this.classList.add('active');_id('revise-text-tab').style.display='none';_id('revise-file-tab').style.display='block'">📎 上传Word文件</span></div>
     <div id="revise-text-tab"><textarea id="revise-text" style="height:200px;" placeholder="在此粘贴你的成品论文内容..."></textarea></div>
     <div id="revise-file-tab" style="display:none;"><div class="upload-zone" onclick="document.getElementById('revise-file').click()"><input type="file" id="revise-file" accept=".docx" onchange="parseDocx(this)" style="display:none"><p style="font-size:30px;">📎</p><p>点击上传 .docx 文件</p></div><div id="revise-docx-preview" style="margin-top:8px;"></div></div>
