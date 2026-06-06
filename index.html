@@ -127,27 +127,41 @@ function parseTemplate(input){
   reader.onload=function(e){
     mammoth.convertToHtml({arrayBuffer:e.target.result}).then(function(r){
       let html=r.value,parser=new DOMParser(),doc=parser.parseFromString(html,'text/html');
-      let sections=[],headings=0,bodyText='',totalWords=0;
+      let sections=[],headings=0,tables=0,lists=0,bodyText='',totalChars=0;
       for(let el of doc.body.children){
-        let tag=el.tagName.toLowerCase(),t=el.textContent.trim();
-        if(!t)continue;totalWords+=t.length;
-        if(['h1','h2','h3','h4'].includes(tag)){headings++;sections.push({type:'heading',level:parseInt(tag[1]),text:t.slice(0,100)});bodyText+='[标题] '+t+'\n';}
-        else if(tag==='p'){sections.push({type:'paragraph',text:t.slice(0,100)});bodyText+=t.slice(0,200)+'\n';}
-        else if(tag==='table')sections.push({type:'table',text:'[表格]'});
+        let tag=el.tagName.toLowerCase(),t=(el.textContent||'').trim();
+        if(!t)continue;
+        if(['h1','h2','h3','h4'].includes(tag)){headings++;sections.push({type:'heading',level:parseInt(tag[1]),text:t.slice(0,100)});bodyText+='[标题'+tag.toUpperCase()+'] '+t+'\n';totalChars+=t.length;}
+        else if(tag==='table'){tables++;let rows=el.querySelectorAll('tr');sections.push({type:'table',rows:rows.length,text:'[表格 '+rows.length+'行]'});bodyText+='[表格 '+rows.length+'行]\n';}
+        else if(tag==='ol'||tag==='ul'){lists++;let items=el.querySelectorAll('li');sections.push({type:'list',items:items.length});bodyText+='[列表] '+Array.from(items).map(i=>i.textContent.trim()).join('; ')+'\n';}
+        else if(tag==='p'){sections.push({type:'paragraph',text:t.slice(0,100)});bodyText+=t.slice(0,250)+'\n';totalChars+=t.length;}
+        else if(tag==='img'){sections.push({type:'image'});bodyText+='[图片]\n';}
+        else{bodyText+=t.slice(0,150)+'\n';totalChars+=t.length;}
       }
-      if(sections.length===0){let lines=r.value.replace(/<[^>]+>/g,'\n').split('\n').filter(l=>l.trim());lines.forEach(l=>{totalWords+=l.length;if(l.length<60){headings++;sections.push({type:'heading',level:2,text:l.trim()});}else sections.push({type:'paragraph',text:l.trim().slice(0,100)});});bodyText=lines.join('\n');}
-      // 分析标题风格
+      if(sections.length===0){let lines=html.replace(/<[^>]+>/g,'\n').split('\n').filter(l=>l.trim());lines.forEach(l=>{if(l.length<60){headings++;sections.push({type:'heading',level:2,text:l.trim()});}else sections.push({type:'paragraph',text:l.trim().slice(0,100)});});bodyText=lines.join('\n');totalChars=bodyText.length;}
       let headingTexts=sections.filter(s=>s.type==='heading').map(s=>s.text);
-      let headingStyle='';if(headingTexts.some(t=>t.match(/^第[一二三四五六七八九十\d]+章/)))headingStyle='章节编号格式: "第X章"';
-      else if(headingTexts.some(t=>t.match(/^[一二三四五六七八九十\d]+[、.]/)))headingStyle='章节编号格式: "一、"/"1."';
-      else headingStyle='自定义标题格式';
-      S.schoolTemplate={name:name,sections:sections.length,headings:headings,totalWords:Math.round(totalWords/1.5),paragraphs:sections.filter(s=>s.type==='paragraph').length,bodyText:bodyText.slice(0,3000),headingStyle:headingStyle,headingsList:headingTexts.slice(0,20)};
-      save();toast(`✅ 模板已分析: ${headings}个标题, ${Math.round(totalWords/1.5).toLocaleString()}字`,'success');renderPage('metadata');
+      let style='',examples=headingTexts.slice(0,15);
+      if(examples.some(t=>t.match(/^第[一二三四五六七八九十\d]+章/)))style='章节: "第X章 标题"';
+      else if(examples.some(t=>t.match(/^[一二三四五六七八九十\d]+[、.]/)))style='章节: "一、标题" 或 "1. 标题"';
+      else style='自定义标题格式';
+      let estWords=Math.round(totalChars/1.5);
+      S.schoolTemplate={name:name,sections:sections.length,headings,tables,lists,totalWords:estWords,paragraphs:sections.filter(s=>s.type==='paragraph').length,bodyText:bodyText.slice(0,5000),headingStyle:style,headingsList:examples,fullStructure:sections.slice(0,30)};
+      save();
+      let info=`${headings}个标题, ${tables}个表格, ${lists}个列表, ~${estWords.toLocaleString()}字`;
+      toast('✅ 模板分析完成: '+info,'success');
+      _id('template-info').innerHTML=`<p style="color:green;">✅ 已加载: <b>${_esc(name)}</b> | ${info}</p>`;
+      renderPage('metadata');
     }).catch(e=>toast('解析失败: '+e.message,'error'));
   };
   reader.readAsArrayBuffer(input.files[0]);
 }
-function getTemplateContext(){if(!S.schoolTemplate)return'';let t=S.schoolTemplate;return`\n【学校论文模板分析】\n- 标题风格: ${t.headingStyle}\n- 标题示例: ${t.headingsList.slice(0,10).join(' | ')}\n- 模板总字数约: ${t.totalWords.toLocaleString()}\n- 内容结构参考:\n${t.bodyText.slice(0,2000)}\n- 请模仿该模板的排版格式和写作风格来写新论文。`}
+function getTemplateContext(){if(!S.schoolTemplate)return'';let t=S.schoolTemplate;return`\n【学校论文模板完整分析】
+- 标题风格: ${t.headingStyle}
+- 标题示例: ${t.headingsList.slice(0,10).join(' | ')}
+- 文档结构: ${t.headings}个标题, ${t.tables||0}个表格, ${t.lists||0}个列表, ${t.paragraphs}个正文段落
+- 模板总字数约: ${t.totalWords.toLocaleString()}字
+- 全文结构:\n${t.bodyText.slice(0,4000)}
+- 请严格模仿该模板的排版格式、章节结构、标题命名方式和写作风格。`}
 
 // ==================== API密钥 ====================
 function renderApikey(el){el.innerHTML=`<h2>🔑 DeepSeek API 密钥</h2><div class="card">${S.apiKey?`<p style="color:green;">✅ 已设置: <code>${S.apiKey.slice(0,10)}...${S.apiKey.slice(-4)}</code></p><button class="btn btn-outline btn-sm" onclick="testKey()">🔄 验证</button><button class="btn btn-danger btn-sm" onclick="S.apiKey='';S.apiValidated=false;save();renderPage('apikey')">🗑️ 删除</button>`:'<p style="color:orange;">⚠️ 未设置密钥</p>'}<hr style="margin:10px 0"><p style="font-size:12px;color:#888;">获取: <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a> | 浏览器本地存储</p><div class="fr" style="margin-top:8px;"><input id="api-input" type="password" placeholder="sk-xxxxxxxx" style="flex:3"><button class="btn btn-primary" onclick="saveKey()" style="flex:1">✅ 验证并保存</button></div></div>`}

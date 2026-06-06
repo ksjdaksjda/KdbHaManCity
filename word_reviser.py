@@ -1,6 +1,6 @@
 """
-Word论文修改工具 - 图形界面版
-保留原排版，AI修改内容。双击运行。
+Word论文修改工具 - AI重写内容，自动匹配学校格式
+双击运行。
 """
 import os, sys, json, time, threading, re, io
 
@@ -75,7 +75,7 @@ class WordReviserApp:
         self.file_label.pack(side=tk.LEFT, padx=5)
         ttk.Label(mid, text="模式:").pack(side=tk.LEFT, padx=(20, 5))
         self.mode_var = tk.StringVar(value="优化语言")
-        mode_combo = ttk.Combobox(mid, textvariable=self.mode_var, values=["优化语言", "降重改写", "扩展补充", "不改标题"], width=10, state="readonly")
+        mode_combo = ttk.Combobox(mid, textvariable=self.mode_var, values=["AI重写(推荐)", "降重改写", "扩展补充"], width=12, state="readonly")
         mode_combo.pack(side=tk.LEFT)
 
         # 进度条
@@ -211,14 +211,21 @@ class WordReviserApp:
 
     def process_loop(self):
         mode = self.mode_var.get()
+        school = self.school_name or ""
+        fmt = """【学校论文格式标准】
+标题: 黑体, 章标题三号(16pt)加粗, 节标题四号(14pt)加粗
+正文: 宋体, 小四号(12pt)
+参考文献: 宋体, 五号(10.5pt)
+行距: 1.5倍
+引用: GB/T 7714-2015 顺序编码制""" if not school else f"""学校: {school}
+请根据中国高校毕业论文GB/T 7713标准格式写作。"""
+
         modes = {
-            "优化语言": "优化语言表达，使其更学术化。保持原意和字数基本不变。",
-            "降重改写": "深度改写降重。变换句式、同义词替换，保持核心信息。",
-            "扩展补充": "适当扩展内容，补充细节和论证。",
-            "不改标题": "优化语言表达。"
+            "AI重写(推荐)": f"你是中文学术论文写作专家。请基于原文的主题和结构，完全重写内容。{fmt}\n学术严谨、逻辑清晰、善用长短句、避免AI套话。",
+            "降重改写": f"深度改写降重，变换句式、同义词替换。{fmt}",
+            "扩展补充": f"扩展内容，补充细节和论证，丰富学术表达。{fmt}"
         }
-        mode_desc = modes.get(mode, modes["优化语言"])
-        skip_h = (mode == "不改标题")
+        mode_desc = modes.get(mode, modes["AI重写(推荐)"])
 
         for idx, (pidx, para) in enumerate(self.paras):
             if not self.processing: break
@@ -273,31 +280,42 @@ class WordReviserApp:
         if not self.doc or not self.modified_paras:
             messagebox.showwarning("提示", "没有修改内容可保存")
             return
-        self.status_label.config(text="保存中...")
+        self.status_label.config(text="保存中...应用GB/T 7713标准格式...")
         self.root.update()
         try:
+            from docx.shared import Pt, Cm
+            from docx.oxml.ns import qn
+            from docx.enum.text import WD_LINE_SPACING
+            # 设置标准页边距和行距
+            for section in self.doc.sections:
+                section.top_margin = Cm(2.54)
+                section.bottom_margin = Cm(2.54)
+                section.left_margin = Cm(3.17)
+                section.right_margin = Cm(3.17)
             for pidx, new_text in self.modified_paras.items():
                 para = self.doc.paragraphs[pidx]
-                # 提取原段落字体信息
-                font_name, font_size, bold, italic, color = None, None, None, None, None
+                is_heading = para.style.name.startswith("Heading")
+                # 清空并重建run
                 runs = para.runs
+                for run in runs: run.text = ""
                 if runs:
                     r0 = runs[0]
-                    font_name = r0.font.name
-                    font_size = r0.font.size
-                    bold = r0.bold
-                    italic = r0.italic
-                    if r0.font.color and r0.font.color.rgb:
-                        color = r0.font.color.rgb
-                # 清空所有run，新建一个run保留原字体
-                for run in para.runs: run.text = ""
-                if runs:
-                    runs[0].text = new_text
-                    # 确保字体属性不变
-                    if font_name: runs[0].font.name = font_name
-                    if font_size: runs[0].font.size = font_size
-                    if bold is not None: runs[0].bold = bold
-                    if italic is not None: runs[0].italic = italic
+                    r0.text = new_text
+                    if is_heading:
+                        r0.font.name = "黑体"
+                        r0._element.rPr.rFonts.set(qn('w:eastAsia'), "黑体")
+                        lvl = int(para.style.name.replace("Heading ","") or "1")
+                        if lvl <= 1: r0.font.size = Pt(16)
+                        elif lvl == 2: r0.font.size = Pt(14)
+                        else: r0.font.size = Pt(12)
+                        r0.bold = True
+                    else:
+                        r0.font.name = "宋体"
+                        r0._element.rPr.rFonts.set(qn('w:eastAsia'), "宋体")
+                        r0.font.size = Pt(12)
+                        r0.bold = False
+                    # 设置行距1.5倍
+                    para.paragraph_format.line_spacing = 1.5
                 else:
                     para.text = new_text
             out = self.file_path.replace(".docx", "_修改版.docx")
