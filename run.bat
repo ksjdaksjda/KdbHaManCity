@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 title Word论文修改工具
-cd /d R:\ThesisWriter
+cd /d "%~dp0"
 
 echo ============================================
 echo   Word论文修改工具
