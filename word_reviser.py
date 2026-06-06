@@ -144,4 +144,11 @@ def _replace_para_text(para, new_text):
         para.text = new_text
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"\n发生错误: {e}")
+        import traceback
+        traceback.print_exc()
+    print("\n按回车键退出...")
+    input()
