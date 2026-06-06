@@ -39,6 +39,7 @@ class RewriterApp:
         self.paras = []          # [(pidx, paragraph_obj), ...]
         self.modified = {}       # {pidx: new_text}
         self.processing = False
+        self.school_name = ""
         self.template_info = ""
         self.build_ui()
         # 自动读API和模板配置
@@ -71,6 +72,10 @@ class RewriterApp:
         ttk.Label(f2, text="目标字数:").pack(side=tk.LEFT, padx=(10,5))
         self.words_var = tk.StringVar(value="不限")
         ttk.Combobox(f2, textvariable=self.words_var, values=["不限", "3000字", "5000字", "8000字", "10000字", "15000字", "20000字", "30000字"], width=8, state="readonly").pack(side=tk.LEFT)
+        ttk.Label(f2, text="学校:").pack(side=tk.LEFT, padx=(10,5))
+        self.school_var = tk.StringVar()
+        ttk.Entry(f2, textvariable=self.school_var, width=12).pack(side=tk.LEFT)
+        self.school_var.trace_add('write', lambda*a: setattr(self, 'school_name', self.school_var.get()))
         # 进度
         self.prog = ttk.Progressbar(self.root, mode='determinate')
         self.prog.pack(fill=tk.X, padx=10, pady=5)
@@ -175,7 +180,9 @@ class RewriterApp:
         mode = self.mode_var.get()
         wc = self.words_var.get()
         wc_str = f"目标总字数: {wc}。每个段落请相应调整字数。" if wc != "不限" else ""
-        fmt = self.template_info or "保持原文排版格式，只替换文字内容"
+        school = self.school_name.strip()
+        school_info = f"学校: {school}。请根据你的训练数据中该校（或同类中国高校）的毕业论文具体格式标准来写作。" if school else ""
+        fmt = (self.template_info or "保持原文排版格式，只替换文字内容") + " " + school_info
         descs = {
             "AI重写": f"你是学术论文专家。请重写此段落，保持主题不变。{wc_str}格式要求: {fmt}。只输出重写后文本，无额外说明。",
             "降重改写": f"深度降重改写。变换句式、同义词。{wc_str}格式: {fmt}。只输出改写后文本。",
