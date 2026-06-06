@@ -160,13 +160,25 @@ class WordReviserApp:
             self.doc = Document(path)
             self.paras = [(i, p) for i, p in enumerate(self.doc.paragraphs) if p.text.strip()]
             self.modified_paras = {}
+            # 分析文档字体
+            fonts = {}; sizes = {}
+            for i, p in self.doc.paragraphs:
+                if p.runs:
+                    r = p.runs[0]
+                    fn = r.font.name or "默认"
+                    fs = str(r.font.size) if r.font.size else "默认"
+                    fonts[fn] = fonts.get(fn, 0) + 1
+                    sizes[fs] = sizes.get(fs, 0) + 1
+            top_font = max(fonts, key=fonts.get) if fonts else "未检测"
+            top_size = max(sizes, key=sizes.get) if sizes else "未检测"
             self.para_list.delete(0, tk.END)
             for idx, para in self.paras:
                 is_h = para.style.name.startswith("Heading")
                 prefix = "[H] " if is_h else "     "
                 self.para_list.insert(tk.END, f"{prefix}{para.text[:60]}...")
-            self.status_label.config(text=f"已加载 {len(self.paras)} 个段落")
-            messagebox.showinfo("加载完成", f"共 {len(self.paras)} 个有内容的段落\n保存后将输出 *_修改版.docx")
+            info = f"已加载 {len(self.paras)} 段 | 字体: {top_font} | 字号: {top_size}"
+            self.status_label.config(text=info)
+            messagebox.showinfo("文档分析", f"段落: {len(self.paras)} 个\n主要字体: {top_font}\n主要字号: {top_size}\n\n修改时每个段落保留其原字体/大小/颜色\n页眉页脚/图片/表格不做任何改动")
         except Exception as e:
             messagebox.showerror("错误", f"无法读取文件: {e}")
 
@@ -266,10 +278,26 @@ class WordReviserApp:
         try:
             for pidx, new_text in self.modified_paras.items():
                 para = self.doc.paragraphs[pidx]
+                # 提取原段落字体信息
+                font_name, font_size, bold, italic, color = None, None, None, None, None
                 runs = para.runs
                 if runs:
-                    for run in runs[1:]: run.text = ""
+                    r0 = runs[0]
+                    font_name = r0.font.name
+                    font_size = r0.font.size
+                    bold = r0.bold
+                    italic = r0.italic
+                    if r0.font.color and r0.font.color.rgb:
+                        color = r0.font.color.rgb
+                # 清空所有run，新建一个run保留原字体
+                for run in para.runs: run.text = ""
+                if runs:
                     runs[0].text = new_text
+                    # 确保字体属性不变
+                    if font_name: runs[0].font.name = font_name
+                    if font_size: runs[0].font.size = font_size
+                    if bold is not None: runs[0].bold = bold
+                    if italic is not None: runs[0].italic = italic
                 else:
                     para.text = new_text
             out = self.file_path.replace(".docx", "_修改版.docx")
