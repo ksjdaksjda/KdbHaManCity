@@ -1,154 +1,301 @@
 """
-成品论文Word修改工具 - 保留原排版，只改内容
-双击运行，需要 Python + DeepSeek API Key
+Word论文修改工具 - 图形界面版
+保留原排版，AI修改内容。双击运行。
 """
-import os, sys, json, time, re
+import os, sys, json, time, threading, re, io
 
-def check_deps():
-    try: from docx import Document; from openai import OpenAI
-    except ImportError:
-        print("缺少依赖，正在安装...")
-        os.system("pip install python-docx openai -q")
-        try: from docx import Document; from openai import OpenAI
-        except: print("安装失败，请手动: pip install python-docx openai"); sys.exit(1)
+# ---- 编码修复 ----
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
-check_deps()
-from docx import Document
-from openai import OpenAI
+# ---- 依赖检查 ----
+missing = []
+try: from docx import Document
+except ImportError: missing.append('python-docx')
+try: from openai import OpenAI
+except ImportError: missing.append('openai')
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "revise_config.json")
 
+# 尝试读取网页版保存的API密钥
+WEB_CONFIG = os.path.join(SCRIPT_DIR, "revise_config.json")
+
 def load_config():
     if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, "r") as f: return json.load(f)
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except: pass
     return {}
+
 def save_config(cfg):
-    with open(CONFIG_FILE, "w") as f: json.dump(cfg, f, indent=2)
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, indent=2)
+
+# ---- GUI ----
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk, scrolledtext
+
+class WordReviserApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Word论文修改工具 - 保留排版 · AI修改内容")
+        self.root.geometry("900x650")
+        self.root.minsize(700, 500)
+        self.config = load_config()
+        self.client = None
+        self.doc = None
+        self.file_path = None
+        self.paras = []
+        self.modified_paras = {}
+        self.current_idx = 0
+        self.processing = False
+        self.build_ui()
+        if self.config.get("api_key"):
+            self.api_var.set(self.config["api_key"])
+            self.root.after(500, self.verify_api_silent)
+
+    def build_ui(self):
+        # 顶部：API密钥
+        top = ttk.Frame(self.root, padding=10)
+        top.pack(fill=tk.X)
+        ttk.Label(top, text="DeepSeek API Key:").pack(side=tk.LEFT)
+        self.api_var = tk.StringVar()
+        api_entry = ttk.Entry(top, textvariable=self.api_var, width=45, show="*")
+        api_entry.pack(side=tk.LEFT, padx=5)
+        ttk.Button(top, text="验证", command=self.verify_api).pack(side=tk.LEFT, padx=2)
+        self.api_status = ttk.Label(top, text="", foreground="gray")
+        self.api_status.pack(side=tk.LEFT, padx=10)
+
+        # 文件选择
+        mid = ttk.Frame(self.root, padding=10)
+        mid.pack(fill=tk.X)
+        ttk.Button(mid, text="选择Word文件", command=self.select_file).pack(side=tk.LEFT)
+        self.file_label = ttk.Label(mid, text="  未选择文件", foreground="gray")
+        self.file_label.pack(side=tk.LEFT, padx=5)
+        ttk.Label(mid, text="模式:").pack(side=tk.LEFT, padx=(20, 5))
+        self.mode_var = tk.StringVar(value="优化语言")
+        mode_combo = ttk.Combobox(mid, textvariable=self.mode_var, values=["优化语言", "降重改写", "扩展补充", "不改标题"], width=10, state="readonly")
+        mode_combo.pack(side=tk.LEFT)
+
+        # 进度条
+        self.progress = ttk.Progressbar(self.root, mode='determinate')
+        self.progress.pack(fill=tk.X, padx=10, pady=5)
+        self.status_label = ttk.Label(self.root, text="就绪", foreground="gray")
+        self.status_label.pack()
+
+        # 主区域：左右分栏
+        main = ttk.Frame(self.root)
+        main.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        main.columnconfigure(0, weight=1)
+        main.columnconfigure(1, weight=1)
+        main.rowconfigure(0, weight=1)
+
+        # 左侧：原文列表
+        left = ttk.LabelFrame(main, text="段落列表 (点击预览)", padding=5)
+        left.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
+        self.para_list = tk.Listbox(left, font=("Microsoft YaHei", 10))
+        self.para_list.pack(fill=tk.BOTH, expand=True)
+        self.para_list.bind('<<ListboxSelect>>', self.on_para_select)
+
+        # 右侧：对比预览
+        right = ttk.LabelFrame(main, text="预览", padding=5)
+        right.grid(row=0, column=1, sticky="nsew")
+        right.rowconfigure(0, weight=1)
+        right.rowconfigure(1, weight=1)
+        right.columnconfigure(0, weight=1)
+
+        ttk.Label(right, text="原文:").grid(row=0, column=0, sticky="w")
+        self.orig_text = scrolledtext.ScrolledText(right, height=8, font=("Microsoft YaHei", 10), wrap=tk.WORD)
+        self.orig_text.grid(row=0, column=0, sticky="nsew", pady=(0, 5))
+
+        ttk.Label(right, text="AI修改后:").grid(row=1, column=0, sticky="w")
+        self.mod_text = scrolledtext.ScrolledText(right, height=8, font=("Microsoft YaHei", 10), wrap=tk.WORD)
+        self.mod_text.grid(row=1, column=0, sticky="nsew")
+
+        # 底部按钮
+        bottom = ttk.Frame(self.root, padding=10)
+        bottom.pack(fill=tk.X)
+        ttk.Button(bottom, text="开始处理", command=self.start_process).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bottom, text="暂停", command=self.pause_process).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bottom, text="保存修改", command=self.save_doc).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bottom, text="撤销当前段", command=self.undo_para).pack(side=tk.LEFT, padx=5)
+        self.progress_text = ttk.Label(bottom, text="", foreground="gray")
+        self.progress_text.pack(side=tk.RIGHT)
+
+    def verify_api_silent(self):
+        try:
+            c = OpenAI(api_key=self.api_var.get(), base_url="https://api.deepseek.com/v1")
+            r = c.chat.completions.create(model="deepseek-chat", messages=[{"role":"user","content":"OK"}], max_tokens=2)
+            self.client = c
+            self.api_status.config(text="已连接", foreground="green")
+            self.config["api_key"] = self.api_var.get()
+            save_config(self.config)
+        except: pass
+
+    def verify_api(self):
+        key = self.api_var.get().strip()
+        if not key:
+            self.api_status.config(text="请输入密钥", foreground="red")
+            return
+        self.api_status.config(text="验证中...", foreground="orange")
+        try:
+            c = OpenAI(api_key=key, base_url="https://api.deepseek.com/v1")
+            r = c.chat.completions.create(model="deepseek-chat", messages=[{"role":"user","content":"OK"}], max_tokens=2)
+            self.client = c
+            self.api_status.config(text="连接成功", foreground="green")
+            self.config["api_key"] = key
+            save_config(self.config)
+        except Exception as e:
+            self.api_status.config(text=f"失败: {str(e)[:40]}", foreground="red")
+
+    def select_file(self):
+        path = filedialog.askopenfilename(filetypes=[("Word文件", "*.docx"), ("所有文件", "*.*")])
+        if not path: return
+        self.file_path = path
+        self.file_label.config(text=f"  {os.path.basename(path)}")
+        self.status_label.config(text="读取文件中...")
+        self.root.update()
+        try:
+            self.doc = Document(path)
+            self.paras = [(i, p) for i, p in enumerate(self.doc.paragraphs) if p.text.strip()]
+            self.modified_paras = {}
+            self.para_list.delete(0, tk.END)
+            for idx, para in self.paras:
+                is_h = para.style.name.startswith("Heading")
+                prefix = "[H] " if is_h else "     "
+                self.para_list.insert(tk.END, f"{prefix}{para.text[:60]}...")
+            self.status_label.config(text=f"已加载 {len(self.paras)} 个段落")
+            messagebox.showinfo("加载完成", f"共 {len(self.paras)} 个有内容的段落\n保存后将输出 *_修改版.docx")
+        except Exception as e:
+            messagebox.showerror("错误", f"无法读取文件: {e}")
+
+    def on_para_select(self, event):
+        sel = self.para_list.curselection()
+        if not sel: return
+        idx = sel[0]
+        if idx >= len(self.paras): return
+        pidx, para = self.paras[idx]
+        self.orig_text.delete("1.0", tk.END)
+        self.orig_text.insert("1.0", para.text)
+        self.mod_text.delete("1.0", tk.END)
+        mod = self.modified_paras.get(pidx, "")
+        self.mod_text.insert("1.0", mod if mod else "(未修改)")
+
+    def start_process(self):
+        if not self.client:
+            self.verify_api()
+            if not self.client:
+                messagebox.showwarning("提示", "请先验证API密钥")
+                return
+        if not self.paras:
+            messagebox.showwarning("提示", "请先选择Word文件")
+            return
+        self.processing = True
+        self.progress["maximum"] = len(self.paras)
+        self.progress["value"] = 0
+        self.current_idx = 0
+        threading.Thread(target=self.process_loop, daemon=True).start()
+
+    def process_loop(self):
+        mode = self.mode_var.get()
+        modes = {
+            "优化语言": "优化语言表达，使其更学术化。保持原意和字数基本不变。",
+            "降重改写": "深度改写降重。变换句式、同义词替换，保持核心信息。",
+            "扩展补充": "适当扩展内容，补充细节和论证。",
+            "不改标题": "优化语言表达。"
+        }
+        mode_desc = modes.get(mode, modes["优化语言"])
+        skip_h = (mode == "不改标题")
+
+        for idx, (pidx, para) in enumerate(self.paras):
+            if not self.processing: break
+            text = para.text.strip()
+            if skip_h and para.style.name.startswith("Heading"):
+                self.update_progress(idx, f"跳过标题: {text[:30]}...")
+                time.sleep(0.1)
+                continue
+            if len(text) < 10:
+                self.update_progress(idx, f"跳过短文本")
+                continue
+
+            self.update_progress(idx, f"修改中: {text[:30]}...")
+            system_prompt = f"你是学术论文编辑专家。{mode_desc}只输出修改后的文本，不要加任何说明。"
+            try:
+                resp = self.client.chat.completions.create(
+                    model="deepseek-chat",
+                    messages=[{"role":"system","content":system_prompt}, {"role":"user","content":f"修改:\n{text}"}],
+                    temperature=0.7, max_tokens=2048
+                )
+                new_text = resp.choices[0].message.content
+                if new_text and len(new_text.strip()) > 5:
+                    self.modified_paras[pidx] = new_text.strip()
+            except Exception as e:
+                self.modified_paras[pidx] = f"[修改失败: {e}]"
+            time.sleep(0.3)
+
+        self.root.after(0, lambda: self.status_label.config(text="处理完成！点击「保存修改」导出"))
+        self.root.after(0, lambda: messagebox.showinfo("完成", f"修改了 {len(self.modified_paras)} 个段落\n点击「保存修改」导出Word"))
+
+    def update_progress(self, idx, msg):
+        self.root.after(0, lambda: self.progress.config(value=idx+1))
+        self.root.after(0, lambda: self.progress_text.config(text=msg))
+
+    def pause_process(self):
+        self.processing = False
+        self.status_label.config(text="已暂停")
+
+    def undo_para(self):
+        sel = self.para_list.curselection()
+        if not sel: return
+        idx = sel[0]
+        if idx < len(self.paras):
+            pidx = self.paras[idx][0]
+            if pidx in self.modified_paras:
+                del self.modified_paras[pidx]
+                self.mod_text.delete("1.0", tk.END)
+                self.mod_text.insert("1.0", "(已撤销)")
+                self.status_label.config(text=f"已撤销第{idx+1}段")
+
+    def save_doc(self):
+        if not self.doc or not self.modified_paras:
+            messagebox.showwarning("提示", "没有修改内容可保存")
+            return
+        self.status_label.config(text="保存中...")
+        self.root.update()
+        try:
+            for pidx, new_text in self.modified_paras.items():
+                para = self.doc.paragraphs[pidx]
+                runs = para.runs
+                if runs:
+                    for run in runs[1:]: run.text = ""
+                    runs[0].text = new_text
+                else:
+                    para.text = new_text
+            out = self.file_path.replace(".docx", "_修改版.docx")
+            if os.path.exists(out):
+                out = self.file_path.replace(".docx", f"_修改版{int(time.time())%10000}.docx")
+            self.doc.save(out)
+            self.status_label.config(text=f"已保存: {os.path.basename(out)}")
+            os.startfile(os.path.dirname(out))
+            messagebox.showinfo("保存成功", f"文件已保存:\n{out}")
+        except Exception as e:
+            messagebox.showerror("错误", f"保存失败: {e}")
 
 def main():
-    print("=" * 60)
-    print("  成品论文Word修改 - 保留原排版，AI修改内容")
-    print("=" * 60)
-    print()
-
-    config = load_config()
-    api_key = config.get("api_key", "")
-    if not api_key:
-        api_key = input("请输入 DeepSeek API Key: ").strip()
-        if api_key: config["api_key"] = api_key; save_config(config)
-    if not api_key: print("未提供API Key，退出。"); return
-
-    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com/v1")
-
-    # 验证API
-    print("验证API...")
-    try:
-        r = client.chat.completions.create(model="deepseek-chat", messages=[{"role":"user","content":"OK"}], max_tokens=5)
-        print(f"  API连接成功 (模型: {r.model})")
-    except Exception as e:
-        print(f"  API连接失败: {e}")
-        return
-
-    input_file = input("\n请输入Word文件路径: ").strip().strip('"').strip("'")
-    if not os.path.exists(input_file): print(f"文件不存在: {input_file}"); return
-
-    print(f"\n读取: {input_file}")
-    doc = Document(input_file)
-
-    # 统计
-    all_paras = [p for p in doc.paragraphs if p.text.strip()]
-    headings = [p for p in all_paras if p.style.name.startswith("Heading")]
-    body = [p for p in all_paras if not p.style.name.startswith("Heading")]
-    print(f"  总段落:{len(all_paras)}  标题:{len(headings)}  正文:{len(body)}")
-
-    print("\n修改模式:")
-    print("  1. 优化语言和学术表达")
-    print("  2. 降重改写")
-    print("  3. 扩展补充内容")
-    print("  4. 不改标题，只改正文")
-    choice = input("选择(默认1): ").strip() or "1"
-
-    modes = {
-        "1":"优化语言表达，使其更学术化、专业。保持原意和字数基本不变。只输出修改后的段落文本，不要加任何说明。",
-        "2":"深度改写降重。变换句式、同义词替换。保持核心信息不变。只输出修改后的段落文本，不要加任何说明。",
-        "3":"适当扩展内容，补充细节和论证。只输出修改后的段落文本，不要加任何说明。",
-        "4":"优化语言表达。只输出修改后的段落文本，不要加任何说明。"
-    }
-    mode_desc = modes.get(choice, modes["1"])
-    skip_headings = (choice == "4")
-
-    # 确定要修改的段落
-    targets = body if skip_headings else all_paras
-    print(f"\n将修改 {len(targets)} 个段落")
-    confirm = input("继续?(y/n): ").strip().lower()
-    if confirm != "y": print("已取消"); return
-
-    # ========== 逐段修改 ==========
-    modified = 0
-    for idx, para in enumerate(targets):
-        text = para.text.strip()
-        if len(text) < 10: continue
-
-        print(f"  [{idx+1}/{len(targets)}] {text[:40]}...", end=" ", flush=True)
-
-        system_prompt = f"你是学术论文编辑专家。{mode_desc}"
-        user_prompt = f"请修改以下论文段落：\n\n{text}"
-
-        try:
-            resp = client.chat.completions.create(
-                model="deepseek-chat",
-                messages=[
-                    {"role":"system","content":system_prompt},
-                    {"role":"user","content":user_prompt}
-                ],
-                temperature=0.7, max_tokens=2048,
-            )
-            new_text = resp.choices[0].message.content
-            if new_text and len(new_text.strip()) > 5:
-                # 清理AI可能加的乱七八糟前缀
-                new_text = new_text.strip()
-                # 保留原始段落中的runs和格式
-                _replace_para_text(para, new_text)
-                modified += 1
-                print(f"✅")
-            else:
-                print("⏭ (无内容)")
-        except Exception as e:
-            print(f"❌ {e}")
-
-        time.sleep(0.5)  # 避免限流
-
-    # 保存
-    output_file = input_file.replace(".docx", "_修改版.docx")
-    if os.path.exists(output_file):
-        base = input_file.replace(".docx", "")
-        output_file = f"{base}_修改版{int(time.time())%10000}.docx"
-    doc.save(output_file)
-
-    print(f"\n{'='*60}")
-    print(f"  修改完成！共 {modified}/{len(targets)} 段")
-    print(f"  输出: {output_file}")
-    print(f"{'='*60}")
-    os.startfile(os.path.dirname(output_file))
-
-def _replace_para_text(para, new_text):
-    """替换段落文字，保留原有格式(runs)"""
-    runs = para.runs
-    if runs:
-        # 保留第一个run，清空后续runs
-        for run in runs[1:]:
-            run.text = ""
-        runs[0].text = new_text
-    else:
-        para.text = new_text
+    if missing:
+        root = tk.Tk()
+        root.withdraw()
+        msg = f"缺少依赖包: {', '.join(missing)}\n\n是否自动安装？"
+        if messagebox.askyesno("安装依赖", msg):
+            import subprocess
+            subprocess.run([sys.executable, "-m", "pip", "install"] + missing, capture_output=True)
+            try: from docx import Document; from openai import OpenAI
+            except: messagebox.showerror("错误", "安装失败，请手动运行:\npip install python-docx openai"); return
+        else: return
+    root = tk.Tk()
+    WordReviserApp(root)
+    root.mainloop()
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"\n发生错误: {e}")
-        import traceback
-        traceback.print_exc()
-    print("\n按回车键退出...")
-    input()
+    main()
