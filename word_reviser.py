@@ -284,7 +284,7 @@ class WordReviserApp:
         for idx, (pidx, para) in enumerate(self.paras):
             if not self.processing: break
             text = para.text.strip()
-            if skip_h and para.style.name.startswith("Heading"):
+            if para.style.name.startswith("Heading"):
                 self.update_progress(idx, f"跳过标题: {text[:30]}...")
                 time.sleep(0.1)
                 continue
