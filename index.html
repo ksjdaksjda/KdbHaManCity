@@ -311,93 +311,53 @@ let _dr=false;
 async function runDeAI(){if(_dr)return;_dr=true;let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){toast('无已撰写章节','error');_dr=false;return}let cfg=S.deaiCfg,enabled=Object.entries(cfg).filter(([,v])=>v);if(!enabled.length){_dr=false;return}let styles={pass1:{n:'学术结构化',d:'使用正式学术语言，消除聊天机器人感。'},pass2:{n:'自然变化',d:'混合长短句，段落长度变化，打破均匀节奏。'},pass3:{n:'个人视角',d:'适当使用第一人称。'},pass4:{n:'具体化',d:'替换模糊表述为具体数据。'},pass5:{n:'人类节奏',d:'加入修辞问句和自然冗余。'}};let out=_id('daout');out.innerHTML='';for(let s of secs){out.innerHTML+=`<p><b>${_esc(s.title)}</b>...</p>`;let txt=s.content;for(let[k,_]of enabled){let st=styles[k];out.innerHTML+=`<p style="color:#888;font-size:12px;">→ ${st.n}...</p>`;try{let full='';for await(let c of dsStream(`改写: ${st.d}\n保留标记。`,txt.slice(0,6000))){full+=c}if(full.trim())txt=full}catch(e){out.innerHTML+=`<p style="color:red;">${e.message}</p>`}}s.content=txt;s.word_count=txt.length;s.deai_passes=(s.deai_passes||0)+enabled.length;out.innerHTML+=`<p style="color:green;">✅ 完成</p>`}save();out.innerHTML+='<p style="color:green;font-weight:bold;">🎉 全部完成</p>';_dr=false}
 function renderDeai(el){let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){el.innerHTML='<div class="card"><p>无已撰写章节</p></div>';return}let cfg=S.deaiCfg,nn={pass1:'学术结构化',pass2:'自然变化',pass3:'个人视角',pass4:'具体化',pass5:'人类节奏'};el.innerHTML=`<h2>🔄 去AI化</h2><div class="card">${Object.entries(nn).map(([k,n],i)=>`<label style="display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;"><input type="checkbox" ${cfg[k]?'checked':''} onchange="S.deaiCfg['${k}']=this.checked;save()"> 第${i+1}轮: <b>${n}</b></label>`).join('')}<button class="btn btn-primary" style="margin-top:10px;" onclick="runDeAI()" ${_dr||!S.networkOk?'disabled':''}>🚀 开始 (${secs.length}章节)</button><div id="daout" style="margin-top:10px;font-size:13px;"></div></div>`}
 
-// ==================== 论文修改（成品论文导入+AI重构） ====================
+// ==================== 论文修改（保留Word原模板结构） ====================
+let _revisedSections=[],_revisedHTML='';
 function renderRevise(el){
-  el.innerHTML=`<h2>📝 成品论文修改</h2><p style="color:#888;margin-bottom:14px;">粘贴已有论文或上传Word文件，AI根据模板帮你调整格式、结构、语言</p>
-  <div class="card"><h3>📄 导入论文</h3>
-    <div class="tab-nav"><span class="active" onclick="this.parentElement.querySelectorAll('span').forEach(s=>s.classList.remove('active'));this.classList.add('active');_id('revise-text-tab').style.display='block';_id('revise-file-tab').style.display='none'">📝 粘贴文本</span><span onclick="this.parentElement.querySelectorAll('span').forEach(s=>s.classList.remove('active'));this.classList.add('active');_id('revise-text-tab').style.display='none';_id('revise-file-tab').style.display='block'">📎 上传Word文件</span></div>
-    <div id="revise-text-tab"><textarea id="revise-text" style="height:200px;" placeholder="在此粘贴你的成品论文内容..."></textarea></div>
-    <div id="revise-file-tab" style="display:none;"><div class="upload-zone" onclick="document.getElementById('revise-file').click()"><input type="file" id="revise-file" accept=".docx" onchange="parseDocx(this)" style="display:none"><p style="font-size:30px;">📎</p><p>点击上传 .docx 文件</p></div><div id="revise-docx-preview" style="margin-top:8px;"></div></div>
-  </div>
-  <div class="card"><h3>⚙️ 修改选项</h3>
-    <div class="fr"><div class="fg"><label>目标模板</label><select id="revise-template">${Object.entries(THESIS_TYPES).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('')}</select></div><div class="fg"><label>修改模式</label><select id="revise-mode"><option>根据模板重构格式和结构</option><option>仅优化语言和学术表达</option><option>扩展内容并补充章节</option><option>一键降重改写</option><option>AI综合评分+修改建议</option></select></div></div>
-    <button class="btn btn-primary" onclick="runRevise()" ${!S.apiKey||!S.networkOk?'disabled':''}>🤖 AI修改论文</button><div id="revise-result" style="margin-top:10px;"></div>
-  </div>`;
+  let d=!S.apiKey||!S.networkOk?'disabled':'';
+  el.innerHTML='<h2>📝 成品论文修改</h2><p style="color:#888;margin-bottom:14px;">上传Word文件，保留原模板结构，AI在原有结构内修改内容。标题和段落一一对应。</p><div class="card"><h3>📎 上传成品论文Word文件</h3><p style="color:#888;font-size:12px;margin-bottom:8px;">上传你的成品论文.docx，系统解析章节结构，修改时保持一致</p><div class="upload-zone" onclick="document.getElementById(\'revise-file\').click()" style="margin-bottom:12px;"><input type="file" id="revise-file" accept=".docx" onchange="parseDocxStructure(this)" style="display:none"><p style="font-size:30px;">📎</p><p>点击上传成品论文 .docx 文件</p></div><p style="font-size:12px;color:#888;">或直接粘贴文本：</p><textarea id="revise-text" style="height:150px;" placeholder="粘贴论文全文..."></textarea><div id="revise-structure" style="margin-top:10px;"></div></div><div class="card"><h3>⚙️ 修改选项</h3><div class="fr"><div class="fg"><label>修改模式</label><select id="revise-mode"><option>保持原结构，优化内容和语言</option><option>保持原结构，降重改写</option><option>保持原结构，扩展补充内容</option></select></div></div><button class="btn btn-primary" onclick="runRevise()" '+d+'>🤖 AI修改论文（保留原结构）</button><div id="revise-result" style="margin-top:10px;"></div></div>';
 }
-function parseDocx(input){
+function parseDocxStructure(input){
   if(!input.files||!input.files[0])return;
-  let reader=new FileReader();
+  let reader=new FileReader(),name=input.files[0].name;
   reader.onload=function(e){
-    mammoth.extractRawText({arrayBuffer:e.target.result}).then(function(r){
-      _id('revise-docx-preview').innerHTML=`<p style="color:green;">✅ 已解析: ${input.files[0].name} (约${r.value.length}字)</p><details><summary>预览前500字</summary><div style="max-height:200px;overflow:auto;background:#fafafa;padding:10px;border-radius:6px;white-space:pre-wrap;">${r.value.slice(0,500)}</div></details>`;
-      _id('revise-text').value=r.value;
+    mammoth.convertToHtml({arrayBuffer:e.target.result}).then(function(r){
+      _revisedHTML=r.value;let textContent=r.value.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ');_id('revise-text').value=textContent;
+      let parser=new DOMParser(),doc=parser.parseFromString(r.value,'text/html'),sections=[],els=doc.body.children;
+      for(let el of els){
+        let tag=el.tagName.toLowerCase();
+        if(['h1','h2','h3','h4'].includes(tag)){sections.push({type:'heading',level:parseInt(tag[1]),text:el.textContent.trim()});}
+        else if(tag==='p'&&el.textContent.trim()){sections.push({type:'paragraph',text:el.textContent.trim()});}
+        else if(tag==='table'){sections.push({type:'table',html:el.outerHTML});}
+      }
+      if(sections.length===0){let lines=textContent.split(/[。.
+]/).filter(l=>l.trim());lines.forEach(l=>{let t=l.trim();if(t.length<60)sections.push({type:'heading',level:2,text:t});else sections.push({type:'paragraph',text:t})});}
+      _revisedSections=sections;
+      _id('revise-structure').innerHTML='<p style="color:green;margin-top:8px;">✅ '+name+' 已解析 | 共 <b>'+sections.length+'</b> 个段落/标题 | 结构:</p><div style="max-height:250px;overflow:auto;background:#fafafa;padding:10px;border-radius:6px;font-size:12px;line-height:1.8;">'+sections.map(s=>s.type==='heading'?'<div style="font-weight:bold;color:var(--pri);margin-top:4px;">'+'#'.repeat(s.level)+' '+_esc(s.text)+'</div>':'<div style="padding-left:16px;color:#555;">'+_esc(s.text.slice(0,80))+(s.text.length>80?'...':'')+'</div>').join('')+'</div>';
     }).catch(function(e){toast('Word解析失败: '+e.message,'error')});
   };
   reader.readAsArrayBuffer(input.files[0]);
 }
-// 公式扫描（扫描文本中的数学表达式并用KaTeX渲染）
-function scanFormulasInText(text){
-  let found=[],seen=new Set();
-  for(let f of COMMON_FORMULAS){f.pattern.lastIndex=0;let m;while((m=f.pattern.exec(text))!==null){let k=f.latex;if(!seen.has(k)){seen.add(k);found.push({latex:f.latex,name:f.name,pos:m.index})}}}
-  let pMatches=text.match(/[pP]\s*[<>=]\s*0\.\d+/g);if(pMatches){pMatches.forEach(m=>{if(!seen.has(m)){seen.add(m);found.push({latex:m.replace(/\s/g,''),name:'P值',pos:text.indexOf(m)})}})}
-  let pmMatches=text.match(/\d+\.?\d*\s*±\s*\d+\.?\d*/g);if(pmMatches){pmMatches.forEach(m=>{if(!seen.has(m)){seen.add(m);found.push({latex:m,name:'均值±标准差',pos:text.indexOf(m)})}})}
-  found.sort((a,b)=>a.pos-b.pos);return found;
-}
 async function runRevise(){
-  let text=_id('revise-text').value.trim();if(!text){toast('请粘贴论文内容或上传Word文件','error');return}
-  let tpl=_id('revise-template').value,mode=_id('revise-mode').value,out=_id('revise-result');
-  // 先扫描公式
-  let formulas=scanFormulasInText(text);
-  let fmCtx='';if(formulas.length>0){fmCtx='\n【检测到的数学公式】\n'+formulas.map(f=>`- ${f.name}: ${f.latex}`).join('\n')+'\n请在修改后的论文中保留这些公式，用 $$...$$ 包裹LaTeX表达式。';}
-  out.innerHTML=`<div class="writing-content">⏳ AI处理中...${formulas.length>0?' (已识别 '+formulas.length+' 个公式)':''}</div>`;
+  let text=_id('revise-text').value.trim();if(!text){toast('请先上传Word文件或粘贴论文','error');return}
+  let mode=_id('revise-mode').value,out=_id('revise-result'),hasStructure=_revisedSections.length>0;
+  let structCtx='';if(hasStructure){structCtx='\n【原论文结构（严格按此结构输出，不可改变标题层级和段落顺序）】\n'+_revisedSections.map((s,i)=>s.type==='heading'?'[标题H'+s.level+'] '+s.text:'[段落'+i+'] '+s.text.slice(0,100)).join('\n');}
+  let formulas=COMMON_FORMULAS.filter(f=>{f.pattern.lastIndex=0;return f.pattern.test(text)});
+  let fmCtx=formulas.length>0?'\n【检测到的公式（保留在原文位置，用 $$公式$$ 包裹）】\n'+formulas.map(f=>f.name+': $$ '+f.latex+' $$').join('\n'):'';
+  out.innerHTML='<div class="writing-content">⏳ 保持原结构修改中...（标题和段落结构不变）</div>';
   let prompts={
-    '根据模板重构格式和结构':`你是学术论文编辑。请根据「${THESIS_TYPES[tpl].name}」标准格式重构论文。保持原文核心观点和数据，调整章节结构、标题层级。**只输出修改后的论文正文，不要加任何"修改前""修改后""说明"等多余文字。直接以论文标题开头。**${fmCtx}`,
-    '仅优化语言和学术表达':`你是学术论文润色专家。优化论文语言使其更学术化。保持原文结构和内容不变。**只输出润色后的论文正文，不要加任何说明性文字。**${fmCtx}`,
-    '扩展内容并补充章节':`你是学术论文写作专家。扩展论文，补充标准章节，目标${THESIS_TYPES[tpl].words}字。**只输出完整论文正文，不要加任何"新增内容""修改说明"等标记。**${fmCtx}`,
-    '一键降重改写':`你是论文降重专家。深度改写降低查重率，变化句式、同义词替换、调整段落。**只输出改写后的论文正文，不要任何额外说明。**${fmCtx}`,
-    'AI综合评分+修改建议':`你是学术论文评审专家。从学术规范、逻辑、语言、创新、数据五维度评分(满分100)。先给出分数和简要建议，然后输出优化后的完整论文。**分数和建议放在最前面，之后直接跟完整论文。**${fmCtx}`
+    '保持原结构，优化内容和语言':'保持原论文结构和标题完全不变，仅优化每个段落内的语言表达使其更学术化。**原标题一字不改，段落数量和顺序保持一致。**输出完整论文。'+structCtx+fmCtx,
+    '保持原结构，降重改写':'保持原论文结构完全不变，对每个段落深度改写降重。**结构、标题、段落顺序必须和原论文一一对应，标题不改。**'+structCtx+fmCtx,
+    '保持原结构，扩展补充内容':'保持原论文结构不变，在每个段落内适当扩展内容使论证更充分。**标题和结构不变，段落顺序不变。**'+structCtx+fmCtx
   };
   try{
-    let full='';
-    for await(let c of dsStream(prompts[mode],text.slice(0,12000))){
-      full+=c;out.innerHTML=`<div class="writing-content">${full}</div>`;
-    }
-    // 清理：去掉常见AI冗余开头
-    let clean=full.replace(/^(好的|以下是|这是|修改后|优化后|重构后)[^\n]*[\n：:]/,'').replace(/^[#\*\-—]+\s*\n/gm,'').trim();
-    S._revisedText=clean;
-    out.innerHTML=`<div class="writing-content" id="revised-content">${renderFormulasInline(clean)}</div>
-    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-success" onclick="downloadRevised('doc')">📄 导出Word</button>
-      <button class="btn btn-primary" onclick="copyRevised()">📋 复制全文</button>
-    </div>`;
-    toast(`✅ 修改完成！识别了 ${formulas.length} 个公式`,'success');
-  }catch(e){out.innerHTML=`<p style="color:red;">失败: ${e.message}</p>`}
+    let full='';for await(let c of dsStream(prompts[mode],text.slice(0,12000))){full+=c;out.innerHTML='<div class="writing-content">'+renderFormulasInline(full)+'</div>'}
+    let clean=full.replace(/^(好的|以下是)[^\n]*[\n]/,'').trim();S._revisedText=clean;
+    out.innerHTML='<div class="writing-content">'+renderFormulasInline(clean)+'</div><div style="margin-top:10px;display:flex;gap:8px;"><button class="btn btn-success" onclick="downloadRevised()">📄 下载Word</button><button class="btn btn-primary" onclick="copyRevised()">📋 复制全文</button></div>';
+    toast('✅ 修改完成！原结构已保留，标题和段落一一对应','success');
+  }catch(e){out.innerHTML='<p style="color:red;">失败: '+e.message+'</p>'}
 }
-function renderFormulasInline(text){
-  let result=text;
-  // 渲染 $$...$$ 中的LaTeX公式
-  result=result.replace(/\$\$(.+?)\$\$/gs,(m,l)=>{
-    try{return `<span class="formula-render">${katex.renderToString(l.trim(),{throwOnError:false})}</span>`}catch(e){return m}
-  });
-  // 渲染 $...$ 中的行内公式
-  result=result.replace(/\$(.+?)\$/g,(m,l)=>{
-    try{return katex.renderToString(l.trim(),{throwOnError:false})}catch(e){return m}
-  });
-  return result;
-}
-function downloadRevised(){
-  let text=S._revisedText||'';
-  // 清理AI冗余
-  text=text.replace(/^(好的|以下是|这是|修改后|优化后|重构后|根据您的要求)[^\n]*[\n：:]/g,'').replace(/^[#\*\-—]+\s*\n/gm,'').trim();
-  let h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><style>body{font-family:SimSun,serif;font-size:12pt;line-height:1.5}h1{font-family:SimHei,sans-serif;font-size:16pt;text-align:center}h2{font-family:SimHei,sans-serif;font-size:14pt}p{text-indent:2em;margin:6pt 0}@page{size:A4;margin:2.54cm 3.17cm}</style></head><body>${text.split('\n').filter(p=>p.trim()).map(p=>`<p>${p}</p>`).join('')}</body></html>`;
-  let b=new Blob([h],{type:'application/msword'}),u=URL.createObjectURL(b),a=document.createElement('a');
-  a.href=u;a.download='修改后的论文.doc';a.click();URL.revokeObjectURL(u);toast('✅ 论文已下载','success');
-}
-function copyRevised(){
-  let text=S._revisedText||'';
-  text=text.replace(/^(好的|以下是|这是|修改后|优化后)[^\n]*[\n：:]/g,'').trim();
-  navigator.clipboard.writeText(text).then(()=>toast('✅ 已复制全文','success')).catch(()=>toast('复制失败','error'));
-}
+
 // ==================== 导出（含数据表格、图片、图表） ====================
 async function doExport(){
   let secs=S.outline.filter(s=>s.content&&s.content.trim());if(!secs.length){toast('无已完成的章节','error');return}
