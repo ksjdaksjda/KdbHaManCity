@@ -1,38 +1,30 @@
 """
 成品论文Word修改工具 - 保留原排版，只改内容
-双击运行，需要 Python 和 DeepSeek API Key
+双击运行，需要 Python + DeepSeek API Key
 """
-import os, sys, json, copy, time, re
-from datetime import datetime
+import os, sys, json, time, re
 
-try:
-    from docx import Document
-    from docx.shared import Pt, Inches, RGBColor
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
-except ImportError:
-    print("请先安装 python-docx: pip install python-docx openai")
-    sys.exit(1)
+def check_deps():
+    try: from docx import Document; from openai import OpenAI
+    except ImportError:
+        print("缺少依赖，正在安装...")
+        os.system("pip install python-docx openai -q")
+        try: from docx import Document; from openai import OpenAI
+        except: print("安装失败，请手动: pip install python-docx openai"); sys.exit(1)
 
-try:
-    from openai import OpenAI
-except ImportError:
-    print("请先安装 openai: pip install openai")
-    sys.exit(1)
+check_deps()
+from docx import Document
+from openai import OpenAI
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(SCRIPT_DIR, "revise_config.json")
 
-# ========== 配置 ==========
 def load_config():
     if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, "r") as f:
-            return json.load(f)
+        with open(CONFIG_FILE, "r") as f: return json.load(f)
     return {}
-
 def save_config(cfg):
-    with open(CONFIG_FILE, "w") as f:
-        json.dump(cfg, f, indent=2)
-
+    with open(CONFIG_FILE, "w") as f: json.dump(cfg, f, indent=2)
 
 def main():
     print("=" * 60)
@@ -41,157 +33,115 @@ def main():
     print()
 
     config = load_config()
-
-    # API Key
     api_key = config.get("api_key", "")
     if not api_key:
         api_key = input("请输入 DeepSeek API Key: ").strip()
-        if api_key:
-            config["api_key"] = api_key
-            save_config(config)
-
-    if not api_key:
-        print("未提供API Key，退出。")
-        return
+        if api_key: config["api_key"] = api_key; save_config(config)
+    if not api_key: print("未提供API Key，退出。"); return
 
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com/v1")
 
-    # 输入文件
-    input_file = input("请输入成品论文Word文件路径（或拖拽文件到此处）: ").strip().strip('"').strip("'")
-    if not os.path.exists(input_file):
-        print(f"文件不存在: {input_file}")
+    # 验证API
+    print("验证API...")
+    try:
+        r = client.chat.completions.create(model="deepseek-chat", messages=[{"role":"user","content":"OK"}], max_tokens=5)
+        print(f"  API连接成功 (模型: {r.model})")
+    except Exception as e:
+        print(f"  API连接失败: {e}")
         return
 
-    print(f"\n正在读取: {input_file}")
+    input_file = input("\n请输入Word文件路径: ").strip().strip('"').strip("'")
+    if not os.path.exists(input_file): print(f"文件不存在: {input_file}"); return
 
-    # 读取文档
+    print(f"\n读取: {input_file}")
     doc = Document(input_file)
 
     # 统计
-    total_paras = len(doc.paragraphs)
-    non_empty = [p for p in doc.paragraphs if p.text.strip()]
-    headings = [p for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    tables = doc.tables
+    all_paras = [p for p in doc.paragraphs if p.text.strip()]
+    headings = [p for p in all_paras if p.style.name.startswith("Heading")]
+    body = [p for p in all_paras if not p.style.name.startswith("Heading")]
+    print(f"  总段落:{len(all_paras)}  标题:{len(headings)}  正文:{len(body)}")
 
-    print(f"  段落总数: {total_paras}")
-    print(f"  有内容段落: {len(non_empty)}")
-    print(f"  标题: {len(headings)}")
-    print(f"  表格: {len(tables)}")
-    print()
-
-    # 选择模式
-    print("修改模式:")
-    print("  1. 优化语言和学术表达（保留结构）")
-    print("  2. 降重改写（保留结构）")
-    print("  3. 扩展补充内容（保留结构）")
-    print("  4. 仅修改正文，不改标题")
-    choice = input("选择 (1-4, 默认1): ").strip() or "1"
-    print()
+    print("\n修改模式:")
+    print("  1. 优化语言和学术表达")
+    print("  2. 降重改写")
+    print("  3. 扩展补充内容")
+    print("  4. 不改标题，只改正文")
+    choice = input("选择(默认1): ").strip() or "1"
 
     modes = {
-        "1": "优化语言和学术表达，使其更学术化、更专业。保持段落结构和字数基本不变。",
-        "2": "深度改写降重。变化句式结构、同义词替换。保持核心信息不变。",
-        "3": "适当扩展内容，补充细节和论证。在原段落基础上丰富。",
-        "4": "优化语言和学术表达。**注意：是一级标题(Heading 1)、二级标题(Heading 2)的段落不要修改，保持原标题。只改正文段落。**"
+        "1":"优化语言表达，使其更学术化、专业。保持原意和字数基本不变。只输出修改后的段落文本，不要加任何说明。",
+        "2":"深度改写降重。变换句式、同义词替换。保持核心信息不变。只输出修改后的段落文本，不要加任何说明。",
+        "3":"适当扩展内容，补充细节和论证。只输出修改后的段落文本，不要加任何说明。",
+        "4":"优化语言表达。只输出修改后的段落文本，不要加任何说明。"
     }
     mode_desc = modes.get(choice, modes["1"])
     skip_headings = (choice == "4")
 
-    # 确认
-    confirm = input(f"将修改约 {len(non_empty)} 个段落，是否继续？(y/n): ").strip().lower()
-    if confirm != "y":
-        print("已取消。")
-        return
+    # 确定要修改的段落
+    targets = body if skip_headings else all_paras
+    print(f"\n将修改 {len(targets)} 个段落")
+    confirm = input("继续?(y/n): ").strip().lower()
+    if confirm != "y": print("已取消"); return
 
-    # ========== 逐段处理 ==========
-    modified_count = 0
-    para_texts = []  # 收集所有要修改的文本
-    para_map = []    # 记录哪些段落要处理
-
-    for i, para in enumerate(doc.paragraphs):
+    # ========== 逐段修改 ==========
+    modified = 0
+    for idx, para in enumerate(targets):
         text = para.text.strip()
-        if not text:
-            continue
-        is_heading = para.style.name.startswith("Heading")
-        if skip_headings and is_heading:
-            print(f"  [{i+1}/{total_paras}] ⏭ 跳过标题: {text[:50]}...")
-            continue
+        if len(text) < 10: continue
 
-        para_texts.append(text)
-        para_map.append(i)
+        print(f"  [{idx+1}/{len(targets)}] {text[:40]}...", end=" ", flush=True)
 
-    print(f"\n实际修改 {len(para_texts)} 个段落\n")
-
-    # 分批处理（每批最多20段，避免token超限）
-    batch_size = 15
-    for batch_start in range(0, len(para_texts), batch_size):
-        batch_end = min(batch_start + batch_size, len(para_texts))
-        batch_texts = para_texts[batch_start:batch_end]
-
-        print(f"[批次 {batch_start//batch_size + 1}] 处理 {len(batch_texts)} 段...")
-
-        # 构建提示
-        segments = "\n\n---SEGMENT---\n\n".join(
-            f"[段落{i+1}]\n{t}" for i, t in enumerate(batch_texts)
-        )
-
-        system_prompt = f"""你是学术论文编辑专家。
-请对以下{len(batch_texts)}个论文段落进行修改。
-修改要求: {mode_desc}
-
-规则:
-1. 保持每个段落的编号 [段落N] 不变
-2. 用 ---SEGMENT--- 分隔各段落
-3. 严格保持段落顺序和数量一致
-4. 不要添加额外的说明文字
-5. 保留原文中的引用标记 [N] 和公式标记"""
+        system_prompt = f"你是学术论文编辑专家。{mode_desc}"
+        user_prompt = f"请修改以下论文段落：\n\n{text}"
 
         try:
-            response = client.chat.completions.create(
+            resp = client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": segments}
+                    {"role":"system","content":system_prompt},
+                    {"role":"user","content":user_prompt}
                 ],
-                temperature=0.7,
-                max_tokens=8192,
+                temperature=0.7, max_tokens=2048,
             )
-            result = response.choices[0].message.content or ""
-
-            # 解析结果
-            modified_segments = result.split("---SEGMENT---")
-            # 提取 [段落N] 后面的内容
-            for i, seg in enumerate(modified_segments):
-                # 去掉 [段落N] 标记
-                cleaned = re.sub(r'^\[段落\d+\]\s*', '', seg.strip()).strip()
-                if cleaned and batch_start + i < len(para_map):
-                    orig_idx = para_map[batch_start + i]
-                    doc.paragraphs[orig_idx].text = cleaned
-                    modified_count += 1
-
-            print(f"  ✅ 完成")
-            time.sleep(1)  # 避免API限流
-
+            new_text = resp.choices[0].message.content
+            if new_text and len(new_text.strip()) > 5:
+                # 清理AI可能加的乱七八糟前缀
+                new_text = new_text.strip()
+                # 保留原始段落中的runs和格式
+                _replace_para_text(para, new_text)
+                modified += 1
+                print(f"✅")
+            else:
+                print("⏭ (无内容)")
         except Exception as e:
-            print(f"  ❌ 失败: {e}")
-            continue
+            print(f"❌ {e}")
 
-    # ========== 保存 ==========
+        time.sleep(0.5)  # 避免限流
+
+    # 保存
     output_file = input_file.replace(".docx", "_修改版.docx")
     if os.path.exists(output_file):
-        name, ext = os.path.splitext(output_file)
-        output_file = f"{name}_{datetime.now().strftime('%H%M%S')}{ext}"
-
+        base = input_file.replace(".docx", "")
+        output_file = f"{base}_修改版{int(time.time())%10000}.docx"
     doc.save(output_file)
-    print(f"\n{'=' * 60}")
-    print(f"  ✅ 修改完成！")
-    print(f"  修改段落: {modified_count}")
-    print(f"  输出文件: {output_file}")
-    print(f"{'=' * 60}")
 
-    # 打开文件夹
+    print(f"\n{'='*60}")
+    print(f"  修改完成！共 {modified}/{len(targets)} 段")
+    print(f"  输出: {output_file}")
+    print(f"{'='*60}")
     os.startfile(os.path.dirname(output_file))
 
+def _replace_para_text(para, new_text):
+    """替换段落文字，保留原有格式(runs)"""
+    runs = para.runs
+    if runs:
+        # 保留第一个run，清空后续runs
+        for run in runs[1:]:
+            run.text = ""
+        runs[0].text = new_text
+    else:
+        para.text = new_text
 
 if __name__ == "__main__":
     main()
