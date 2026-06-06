@@ -50,6 +50,8 @@ class WordReviserApp:
         self.modified_paras = {}
         self.current_idx = 0
         self.processing = False
+        self.template_analysis = None
+        self.school_name = ""
         self.build_ui()
         if self.config.get("api_key"):
             self.api_var.set(self.config["api_key"])
@@ -77,6 +79,7 @@ class WordReviserApp:
         self.mode_var = tk.StringVar(value="优化语言")
         mode_combo = ttk.Combobox(mid, textvariable=self.mode_var, values=["AI重写(推荐)", "降重改写", "扩展补充"], width=12, state="readonly")
         mode_combo.pack(side=tk.LEFT)
+        ttk.Button(mid, text="分析模板", command=self.analyze_template).pack(side=tk.LEFT, padx=5)
 
         # 进度条
         self.progress = ttk.Progressbar(self.root, mode='determinate')
@@ -149,6 +152,54 @@ class WordReviserApp:
         except Exception as e:
             self.api_status.config(text=f"失败: {str(e)[:40]}", foreground="red")
 
+    def analyze_template(self):
+        if not self.doc:
+            messagebox.showwarning("提示", "请先选择Word文件")
+            return
+        from docx.shared import Pt, Cm, Inches
+        from docx.oxml.ns import qn
+        doc = self.doc
+        # 页边距
+        sec = doc.sections[0]
+        margins = f"上{sec.top_margin/914400*2.54:.1f}cm 下{sec.bottom_margin/914400*2.54:.1f}cm 左{sec.left_margin/914400*2.54:.1f}cm 右{sec.right_margin/914400*2.54:.1f}cm"
+        # 字体统计
+        fonts={}; sizes={}; h_fonts={}; h_sizes={}
+        for p in doc.paragraphs:
+            if not p.runs or not p.text.strip(): continue
+            r=p.runs[0]; fn=r.font.name or "默认"; fs=str(r.font.size) if r.font.size else "默认"
+            if p.style.name.startswith("Heading"):
+                h_fonts[fn]=h_fonts.get(fn,0)+1; h_sizes[fs]=h_sizes.get(fs,0)+1
+            else:
+                fonts[fn]=fonts.get(fn,0)+1; sizes[fs]=sizes.get(fs,0)+1
+        body_font=max(fonts,key=fonts.get) if fonts else "未检测"
+        head_font=max(h_fonts,key=h_fonts.get) if h_fonts else "未检测"
+        body_size=max(sizes,key=sizes.get) if sizes else "未检测"
+        # 段落统计
+        all_p=[p for p in doc.paragraphs if p.text.strip()]
+        h1=[p for p in all_p if p.style.name=='Heading 1']
+        h2=[p for p in all_p if p.style.name=='Heading 2']
+        body=[p for p in all_p if not p.style.name.startswith("Heading")]
+        tables=doc.tables
+        # 构建分析
+        analysis=[]
+        analysis.append(f"页边距: {margins}")
+        analysis.append(f"纸张: {sec.page_width/914400*2.54:.0f}x{sec.page_height/914400*2.54:.0f}cm")
+        analysis.append(f"标题字体: {head_font}")
+        analysis.append(f"正文字体: {body_font} {body_size}")
+        analysis.append(f"一级标题: {len(h1)}个")
+        analysis.append(f"二级标题: {len(h2)}个")
+        analysis.append(f"正文段落: {len(body)}个")
+        analysis.append(f"表格: {len(tables)}个")
+        analysis.append(f"总段落: {len(all_p)}个")
+        # 标题样本
+        if h1: analysis.append(f"一级标题示例: {h1[0].text[:50]}")
+        if h2: analysis.append(f"二级标题示例: {h2[0].text[:50]}")
+        self.template_analysis = "\n".join(analysis)
+        # 显示
+        msg = "【文档完整分析】\n\n" + "\n".join(analysis)
+        messagebox.showinfo("模板分析报告", msg)
+        self.status_label.config(text=f"模板已分析: {head_font}标题 + {body_font}正文")
+
     def select_file(self):
         path = filedialog.askopenfilename(filetypes=[("Word文件", "*.docx"), ("所有文件", "*.*")])
         if not path: return
@@ -211,19 +262,22 @@ class WordReviserApp:
 
     def process_loop(self):
         mode = self.mode_var.get()
-        school = self.school_name or ""
-        fmt = """【学校论文格式标准】
+        fmt = ""
+        if self.template_analysis:
+            fmt = f"""【学校论文格式标准 - 从上传模板中提取】
+{self.template_analysis}
+请严格按照以上格式标准写作。字体/字号/页边距必须和模板一致。"""
+        else:
+            fmt = """【中国高校毕业论文标准格式 GB/T 7713】
 标题: 黑体, 章标题三号(16pt)加粗, 节标题四号(14pt)加粗
-正文: 宋体, 小四号(12pt)
-参考文献: 宋体, 五号(10.5pt)
-行距: 1.5倍
-引用: GB/T 7714-2015 顺序编码制""" if not school else f"""学校: {school}
-请根据中国高校毕业论文GB/T 7713标准格式写作。"""
+正文: 宋体, 小四号(12pt), 首行缩进2字符, 1.5倍行距
+参考文献: 宋体五号(10.5pt), GB/T 7714-2015
+页边距: 上2.54cm 下2.54cm 左3.17cm 右3.17cm"""
 
         modes = {
-            "AI重写(推荐)": f"你是中文学术论文写作专家。请基于原文的主题和结构，完全重写内容。{fmt}\n学术严谨、逻辑清晰、善用长短句、避免AI套话。",
-            "降重改写": f"深度改写降重，变换句式、同义词替换。{fmt}",
-            "扩展补充": f"扩展内容，补充细节和论证，丰富学术表达。{fmt}"
+            "AI重写(推荐)": f"你是中文学术论文写作专家。请基于原文主题，完全重写论文内容。{fmt}\n学术严谨、逻辑清晰、善用长短句。",
+            "降重改写": f"深度改写降重。变换句式、同义词替换。{fmt}",
+            "扩展补充": f"扩展补充内容，丰富论证。{fmt}"
         }
         mode_desc = modes.get(mode, modes["AI重写(推荐)"])
 
