@@ -79,7 +79,7 @@ canvas{max-width:100%;margin:8px 0}
 
 <div id="sidebar">
   <div class="logo">📝 论文助手</div><div class="net" id="net-status">检测网络中...</div>
-  <div id="sidebar-nav"></div><div class="bottom">v7.0 | 15模板<br>每台设备独立</div>
+  <div id="sidebar-nav"></div><div class="bottom">v8.0 | 公式识别<br>每台设备独立</div>
 </div>
 <div id="main"></div>
 
@@ -335,24 +335,68 @@ function parseDocx(input){
   };
   reader.readAsArrayBuffer(input.files[0]);
 }
+// 公式扫描（扫描文本中的数学表达式并用KaTeX渲染）
+function scanFormulasInText(text){
+  let found=[],seen=new Set();
+  for(let f of COMMON_FORMULAS){f.pattern.lastIndex=0;let m;while((m=f.pattern.exec(text))!==null){let k=f.latex;if(!seen.has(k)){seen.add(k);found.push({latex:f.latex,name:f.name,pos:m.index})}}}
+  let pMatches=text.match(/[pP]\s*[<>=]\s*0\.\d+/g);if(pMatches){pMatches.forEach(m=>{if(!seen.has(m)){seen.add(m);found.push({latex:m.replace(/\s/g,''),name:'P值',pos:text.indexOf(m)})}})}
+  let pmMatches=text.match(/\d+\.?\d*\s*±\s*\d+\.?\d*/g);if(pmMatches){pmMatches.forEach(m=>{if(!seen.has(m)){seen.add(m);found.push({latex:m,name:'均值±标准差',pos:text.indexOf(m)})}})}
+  found.sort((a,b)=>a.pos-b.pos);return found;
+}
 async function runRevise(){
   let text=_id('revise-text').value.trim();if(!text){toast('请粘贴论文内容或上传Word文件','error');return}
   let tpl=_id('revise-template').value,mode=_id('revise-mode').value,out=_id('revise-result');
-  out.innerHTML='<div class="writing-content">⏳ AI处理中...</div>';
+  // 先扫描公式
+  let formulas=scanFormulasInText(text);
+  let fmCtx='';if(formulas.length>0){fmCtx='\n【检测到的数学公式】\n'+formulas.map(f=>`- ${f.name}: ${f.latex}`).join('\n')+'\n请在修改后的论文中保留这些公式，用 $$...$$ 包裹LaTeX表达式。';}
+  out.innerHTML=`<div class="writing-content">⏳ AI处理中...${formulas.length>0?' (已识别 '+formulas.length+' 个公式)':''}</div>`;
   let prompts={
-    '根据模板重构格式和结构':`你是学术论文编辑。请根据「${THESIS_TYPES[tpl].name}」的标准格式，对以下论文进行重构。保持原文核心观点和数据，调整章节结构、标题层级、参考文献格式，使其符合标准。`,
-    '仅优化语言和学术表达':`你是学术论文润色专家。请优化以下论文的语言表达，使其更学术化、专业。保持原文结构不变，仅改善语言质量。`,
-    '扩展内容并补充章节':`你是学术论文写作专家。请扩展以下论文，补充缺失的标准章节（如摘要、文献综述、结论等），丰富论证内容。目标字数约${THESIS_TYPES[tpl].words}字。`,
-    '一键降重改写':`你是论文降重专家。请对以下论文进行深度改写以降低查重率。变化句式结构、同义词替换、调整段落顺序，但保持学术准确性和核心信息不变。使其查重率大幅降低。`,
-    'AI综合评分+修改建议':`你是学术论文评审专家。请对以下论文进行综合评分（满分100分），从学术规范、逻辑结构、语言表达、创新性、数据支撑五个维度打分，并给出具体修改建议。然后给出优化后的版本。`
+    '根据模板重构格式和结构':`你是学术论文编辑。请根据「${THESIS_TYPES[tpl].name}」标准格式重构论文。保持原文核心观点和数据，调整章节结构、标题层级。**只输出修改后的论文正文，不要加任何"修改前""修改后""说明"等多余文字。直接以论文标题开头。**${fmCtx}`,
+    '仅优化语言和学术表达':`你是学术论文润色专家。优化论文语言使其更学术化。保持原文结构和内容不变。**只输出润色后的论文正文，不要加任何说明性文字。**${fmCtx}`,
+    '扩展内容并补充章节':`你是学术论文写作专家。扩展论文，补充标准章节，目标${THESIS_TYPES[tpl].words}字。**只输出完整论文正文，不要加任何"新增内容""修改说明"等标记。**${fmCtx}`,
+    '一键降重改写':`你是论文降重专家。深度改写降低查重率，变化句式、同义词替换、调整段落。**只输出改写后的论文正文，不要任何额外说明。**${fmCtx}`,
+    'AI综合评分+修改建议':`你是学术论文评审专家。从学术规范、逻辑、语言、创新、数据五维度评分(满分100)。先给出分数和简要建议，然后输出优化后的完整论文。**分数和建议放在最前面，之后直接跟完整论文。**${fmCtx}`
   };
   try{
     let full='';
     for await(let c of dsStream(prompts[mode],text.slice(0,12000))){
       full+=c;out.innerHTML=`<div class="writing-content">${full}</div>`;
     }
-    toast('✅ 修改完成！','success');
+    // 清理：去掉常见AI冗余开头
+    let clean=full.replace(/^(好的|以下是|这是|修改后|优化后|重构后)[^\n]*[\n：:]/,'').replace(/^[#\*\-—]+\s*\n/gm,'').trim();
+    S._revisedText=clean;
+    out.innerHTML=`<div class="writing-content" id="revised-content">${renderFormulasInline(clean)}</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-success" onclick="downloadRevised('doc')">📄 导出Word</button>
+      <button class="btn btn-primary" onclick="copyRevised()">📋 复制全文</button>
+    </div>`;
+    toast(`✅ 修改完成！识别了 ${formulas.length} 个公式`,'success');
   }catch(e){out.innerHTML=`<p style="color:red;">失败: ${e.message}</p>`}
+}
+function renderFormulasInline(text){
+  let result=text;
+  // 渲染 $$...$$ 中的LaTeX公式
+  result=result.replace(/\$\$(.+?)\$\$/gs,(m,l)=>{
+    try{return `<span class="formula-render">${katex.renderToString(l.trim(),{throwOnError:false})}</span>`}catch(e){return m}
+  });
+  // 渲染 $...$ 中的行内公式
+  result=result.replace(/\$(.+?)\$/g,(m,l)=>{
+    try{return katex.renderToString(l.trim(),{throwOnError:false})}catch(e){return m}
+  });
+  return result;
+}
+function downloadRevised(){
+  let text=S._revisedText||'';
+  // 清理AI冗余
+  text=text.replace(/^(好的|以下是|这是|修改后|优化后|重构后|根据您的要求)[^\n]*[\n：:]/g,'').replace(/^[#\*\-—]+\s*\n/gm,'').trim();
+  let h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"><style>body{font-family:SimSun,serif;font-size:12pt;line-height:1.5}h1{font-family:SimHei,sans-serif;font-size:16pt;text-align:center}h2{font-family:SimHei,sans-serif;font-size:14pt}p{text-indent:2em;margin:6pt 0}@page{size:A4;margin:2.54cm 3.17cm}</style></head><body>${text.split('\n').filter(p=>p.trim()).map(p=>`<p>${p}</p>`).join('')}</body></html>`;
+  let b=new Blob([h],{type:'application/msword'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download='修改后的论文.doc';a.click();URL.revokeObjectURL(u);toast('✅ 论文已下载','success');
+}
+function copyRevised(){
+  let text=S._revisedText||'';
+  text=text.replace(/^(好的|以下是|这是|修改后|优化后)[^\n]*[\n：:]/g,'').trim();
+  navigator.clipboard.writeText(text).then(()=>toast('✅ 已复制全文','success')).catch(()=>toast('复制失败','error'));
 }
 // ==================== 导出（含数据表格、图片、图表） ====================
 async function doExport(){
