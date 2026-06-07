@@ -89,7 +89,7 @@ const PWD='2004622',DS_URL='https://api.deepseek.com/v1',DS_MODEL='deepseek-chat
 let S={page:'home',thesisType:'chinese_bachelor',apiKey:'',apiValidated:false,networkOk:false,metadata:{title:'',title_en:'',author:'',advisor:'',university:'',department:'',student_id:'',degree:'本科'},outline:[],userData:'',referenceLinks:'',references:[],formulas:[],feedbacks:[],currentSectionIdx:0,deaiCfg:{pass1:true,pass2:true,pass3:false,pass4:true,pass5:false},uploadedFiles:[],dataTables:{},dataCharts:{},uploadedImages:[],selectedDataTab:'text',schoolTemplate:null};
 let _id=n=>document.getElementById(n),_esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const THESIS_TYPES={chinese_bachelor:{name:'本科毕业论文',words:15000},chinese_master:{name:'硕士毕业论文',words:30000},chinese_doctor:{name:'博士毕业论文',words:50000},journal_paper:{name:'期刊论文',words:8000},course_paper:{name:'课程论文',words:5000},research_report:{name:'研究报告',words:10000},literature_review:{name:'文献综述',words:8000},proposal:{name:'开题报告',words:5000},midterm:{name:'中期报告',words:4000},experiment:{name:'实验报告',words:6000},case_study:{name:'案例分析',words:8000},survey:{name:'调研报告',words:10000},design_doc:{name:'毕业设计说明书',words:12000},grant:{name:'课题申报书',words:6000},ppt_outline:{name:'学术PPT大纲',words:3000}};
-const NAV=[{id:'home',icon:'🏠',label:'首页'},{id:'metadata',icon:'📋',label:'论文信息'},{id:'apikey',icon:'🔑',label:'API密钥'},{id:'outline',icon:'📑',label:'大纲'},{id:'data',icon:'📊',label:'数据输入'},{id:'writing',icon:'✍️',label:'逐节写作'},{id:'formulas',icon:'📐',label:'公式管理'},{id:'references',icon:'📚',label:'参考文献'},{id:'feedback',icon:'💬',label:'意见反馈'},{id:'deai',icon:'🔄',label:'去AI化'},{id:'revise',icon:'📝',label:'论文修改'},{id:'export',icon:'📥',label:'导出'}];
+const NAV=[{id:'home',icon:'🏠',label:'首页'},{id:'metadata',icon:'📋',label:'论文信息'},{id:'apikey',icon:'🔑',label:'API密钥'},{id:'outline',icon:'📑',label:'大纲'},{id:'data',icon:'📊',label:'数据输入'},{id:'writing',icon:'✍️',label:'逐节写作'},{id:'fullgen',icon:'🚀',label:'一键全文'},{id:'compact',icon:'🗜️',label:'精简写作'},{id:'formulas',icon:'📐',label:'公式管理'},{id:'references',icon:'📚',label:'参考文献'},{id:'feedback',icon:'💬',label:'意见反馈'},{id:'deai',icon:'🔄',label:'去AI化'},{id:'revise',icon:'📝',label:'论文修改'},{id:'export',icon:'📥',label:'导出'}];
 
 function toast(m,t='info'){let e=document.createElement('div');e.className='toast '+t;e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2800)}
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(S))}catch(e){toast('存储空间不足，请清理旧数据','error')}}
@@ -474,6 +474,256 @@ function exportForTemplate(){
   a.download=(S.metadata.title||'thesis')+'_template.json';a.click();
   URL.revokeObjectURL(a.href);toast('✅ JSON已下载，用fill_template.py打开','success');
 }
+// ====================  一键全文生成 ====================
+
+function renderFullgen(el){
+  let secs=S.outline;
+  if(!S.apiKey||secs.length===0){el.innerHTML=`<div class="card"><p>请先生成大纲并设置API密钥</p></div>`;return}
+  let totalTarget=S._fullgenTotal||S.metadata?.words||15000;
+  let density=S._fullgenDensity||'standard';
+  let densityLabels={concise:'简洁 (紧凑凝练)',standard:'标准 (学术规范)',detailed:'详细 (全面展开)'};
+  // 按大纲比例分配字数
+  let existing=secs.reduce((s,i)=>s+(i.word_target||0),0);
+  if(existing===0) existing=totalTarget;
+  let alloc=secs.map(s=>Math.round(totalTarget*(s.word_target||(totalTarget/secs.length))/existing));
+  let written=secs.filter(s=>s.content&&s.content.trim()).length;
+  let genIdx=S._fullgenIdx||0;
+
+  el.innerHTML=`<h2>🚀 一键全文生成</h2>
+<div class="card">
+  <h3>⚙️ 生成设置</h3>
+  <div class="fr">
+    <div class="fg"><label>字数总目标</label>
+      <input type="range" id="fg-total" min="5000" max="50000" step="500" value="${totalTarget}" oninput="_id('fg-total-v').textContent=parseInt(this.value).toLocaleString();let v=parseInt(this.value);S._fullgenTotal=v;save();S._fgNeedRecalc=true">
+      <span id="fg-total-v" style="font-weight:bold;color:var(--acc);">${totalTarget.toLocaleString()}</span> 字
+    </div>
+    <div class="fg"><label>写作密度</label>
+      <select id="fg-density" onchange="S._fullgenDensity=this.value;save();S._fgNeedRecalc=true">
+        ${Object.entries(densityLabels).map(([k,v])=>`<option value="${k}" ${density===k?'selected':''}>${v}</option>`).join('')}
+      </select>
+    </div>
+  </div>
+  <p style="font-size:11px;color:#888;margin-top:4px;">简洁: 精简表达 | 标准: 学术常规 | 详细: 充分论证</p>
+</div>
+<div class="card">
+  <h3>📑 章节字数分配</h3>
+  <button class="btn btn-sm btn-outline" onclick="recalcAlloc();renderPage('fullgen')" style="margin-bottom:8px;">🔄 重新计算分配</button>
+  <div id="fg-alloc-list">${_renderAllocList(alloc,genIdx)}</div>
+</div>
+<div class="card">
+  <div class="fr">
+    <span><b>进度</b>: ${genIdx}/${secs.length} 节 | 已完成: ${written} 节</span>
+    ${genIdx>0&&genIdx<secs.length?`<button class="btn btn-sm btn-outline" onclick="S._fullgenIdx=0;save();renderPage('fullgen')">🔄 重置</button>`:''}
+  </div>
+  <div class="progress-bar" style="height:10px;margin:10px 0;"><div class="progress-fill" style="width:${Math.round(genIdx/secs.length*100)}%;"></div></div>
+  <button id="fg-start-btn" class="btn btn-primary" style="font-size:15px;padding:10px 28px;" onclick="runFullGen()" ${S.networkOk?'':'disabled'}>
+    ${genIdx>0&&genIdx<secs.length?'▶ 继续生成 (从第'+(genIdx+1)+'节开始)':'🚀 开始一键生成全文'}
+  </button>
+  <button id="fg-stop-btn" class="btn btn-danger" style="font-size:14px;padding:8px 20px;margin-left:8px;display:none;" onclick="S._fgStop=true;_id('fg-stop-btn').style.display='none'">⏹ 停止</button>
+</div>
+<div id="fg-output" style="margin-top:12px;"></div>`;
+}
+
+function _renderAllocList(alloc,currentIdx){
+  let secs=S.outline;
+  return secs.map((s,i)=>{
+    let hasContent=s.content&&s.content.trim();
+    let icon=hasContent?'✅':(i===currentIdx&&S._fgRunning?'⏳':(i<currentIdx?'⚪':'⬜'));
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f0f0;">
+      <span>${icon} <b>${_esc(s.title)}</b></span>
+      <span style="font-size:12px;color:#888;">目标: ${alloc[i].toLocaleString()}字 ${hasContent?` | 实际: ${(s.word_count||0).toLocaleString()}字`:` | 类型: ${s.type}`}</span>
+    </div>`;
+  }).join('');
+}
+
+function recalcAlloc(){
+  let total=S._fullgenTotal||15000,secs=S.outline;
+  let n=secs.length;if(n===0)return;
+  let defaults={chapter:1.5,section:1.0};
+  let weights=secs.map(s=>defaults[s.type]||1);
+  let wsum=weights.reduce((a,b)=>a+b,0);
+  secs.forEach((s,i)=>{s.word_target=Math.round(total*weights[i]/wsum)});
+  S._fgNeedRecalc=false;save();
+}
+
+async function runFullGen(){
+  if(!S.apiKey||!S.networkOk){toast('请先设置API密钥并确保网络可用','error');return}
+  let secs=S.outline;if(secs.length===0)return;
+  if(S._fgNeedRecalc) recalcAlloc();
+  let total=S._fullgenTotal||15000,density=S._fullgenDensity||'standard';
+  let existing=secs.reduce((s,i)=>s+(i.word_target||0),0);
+  if(existing===0) existing=total;
+  let alloc=secs.map(s=>Math.round(total*(s.word_target||(total/secs.length))/existing));
+
+  let densitySys={concise:'行文简洁凝练，删除任何冗余表述，每句话都有信息量，段落紧凑。字数控制在目标字数的90%-100%。',standard:'学术规范写作，论证充分但不过度展开。字数接近目标字数。',detailed:'全面深入展开论述，丰富的例证和文献支撑，详细阐释每个观点。字数达到目标字数的100%-120%。'};
+  let sys=`你是中文学术论文写作专家。请一次性完成论文全文写作。${densitySys[density]||densitySys.standard}遵循GB/T 7713标准，逻辑严谨。数据引用标记: [TABLE:表名]、[CHART:图表名]、[IMAGE:图片名]、[FORMULA:N]。${getTemplateContext()}`;
+
+  let dtCtx='';for(let[k,v]of Object.entries(S.dataTables)){dtCtx+=`\n[TABLE:${k}] ${v.headers.filter(h=>h).join(',')} (${v.rows.length}行) 前3行: ${v.rows.slice(0,3).map(r=>r.join('|')).join('; ')}`}
+  let imgCtx='';S.uploadedImages.forEach(i=>{imgCtx+=`\n[IMAGE:${i.name}]`});
+  let chartCtx='';Object.keys(S.dataCharts).forEach(k=>{chartCtx+=`\n[CHART:${k}]`});
+  let oc=secs.map((s,i)=>`${i+1}. ${s.title} — 目标: ${alloc[i]}字`).join('\n');
+
+  S._fgStop=false;let start=S._fullgenIdx||0;
+  _id('fg-start-btn').disabled=true;_id('fg-stop-btn').style.display='inline-block';
+  S._fgRunning=true;
+
+  for(let i=start;i<secs.length;i++){
+    if(S._fgStop){S._fullgenIdx=i;save();toast('已停止，进度已保存','info');break}
+    let sec=secs[i];
+    // 生成前文上下文
+    let pc='';for(let j=Math.max(0,i-2);j<i;j++){if(secs[j].content)pc+=`[${secs[j].title}] ${secs[j].content.slice(-500)}\n`}
+
+    let usr=`论文题目: ${S.metadata.title}\n【完整大纲】\n${oc}\n【当前章节】${i+1}/${secs.length}: ${sec.title}\n目标字数: ${alloc[i]}字\n【前文摘要】${pc||'(论文开头)'}${S.userData?'\n【数据描述】'+S.userData:''}${dtCtx?`\n【数据表格】${dtCtx}`:''}${imgCtx?`\n【图片】${imgCtx}`:''}${chartCtx?`\n【图表】${chartCtx}`:''}\n请直接输出「${sec.title}」的完整正文内容，不输出标题本身。`;
+
+    try{
+      _id('fg-output').innerHTML=`<div class="card"><p>⏳ 正在生成第 ${i+1}/${secs.length} 节: <b>${_esc(sec.title)}</b> (目标${alloc[i]}字)...</p><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(i/secs.length*100)}%;"></div></div></div>`;
+      let full='',el=document.createElement('div');el.className='card writing-content';_id('fg-output').appendChild(el);
+      for await(let c of dsStream(sys,usr)){
+        full+=c;el.textContent=full;
+      }
+      if(full.trim()){
+        sec.content=full.trim().replace(/^(好的|以下是|这是)\s*[:：]?\s*\n?/i,'');
+        sec.word_count=sec.content.length;sec.status='written';
+      }
+      S._fullgenIdx=i+1;save();
+      _id('fg-output').innerHTML+=`<p style="color:green;margin-top:6px;">✅ 第${i+1}节完成 (${sec.word_count||0}字) | ${i+1>=secs.length?'🎉 全文生成完毕!':''}</p>`;
+    }catch(e){
+      S._fullgenIdx=i;save();
+      _id('fg-output').innerHTML+=`<p style="color:red;">❌ 第${i+1}节失败: ${_esc(e.message)} | 已保存进度，可点击继续</p>`;
+      break;
+    }
+  }
+  S._fgRunning=false;
+  _id('fg-start-btn').disabled=false;_id('fg-stop-btn').style.display='none';
+  save();renderPage('fullgen');
+}
+
+// ==================== 精简写作 ====================
+
+function renderCompact(el){
+  let secs=S.outline,w=secs.filter(s=>s.content&&s.content.trim());
+  if(!S.apiKey||w.length===0){el.innerHTML=`<div class="card"><p>请先逐节写作或一键生成论文内容</p></div>`;return}
+  let mode=S._compactMode||'full';
+  let ratio=S._compactRatio||20;
+  let idx=S._compactIdx||0;
+  if(idx>=w.length) idx=0;
+
+  el.innerHTML=`<h2>🗜️ 精简写作</h2>
+<div class="card">
+  <h3>⚙️ 精简设置</h3>
+  <div class="fr">
+    <div class="fg"><label>模式</label>
+      <select id="cp-mode" onchange="S._compactMode=this.value;save();renderPage('compact')">
+        <option value="full" ${mode==='full'?'selected':''}>全文精简 (一键)</option>
+        <option value="section" ${mode==='section'?'selected':''}>逐节精简 (精细控制)</option>
+      </select>
+    </div>
+    <div class="fg"><label>精简强度: <b id="cp-ratio-v">${ratio}%</b></label>
+      <input type="range" id="cp-ratio" min="5" max="50" value="${ratio}" oninput="_id('cp-ratio-v').textContent=this.value+'%';S._compactRatio=parseInt(this.value);save()">
+    </div>
+  </div>
+  <p style="font-size:11px;color:#888;">精简强度=目标减少字数百分比。不删[TABLE]/[CHART]/[IMAGE]标记和公式。</p>
+</div>`;
+
+  if(mode==='full'){
+    let totalBefore=w.reduce((s,i)=>s+(i.word_count||0),0);
+    el.innerHTML+=`<div class="card">
+  <h3>📊 全文精简</h3>
+  <div class="stats"><div class="stat"><div class="v">${totalBefore.toLocaleString()}</div><div class="l">当前总字数</div></div><div class="stat"><div class="v">~${Math.round(totalBefore*(1-ratio/100)).toLocaleString()}</div><div class="l">预计精简后</div></div><div class="stat"><div class="v">~${ratio}%</div><div class="l">减少比例</div></div></div>
+  <button id="cp-full-btn" class="btn btn-primary" style="font-size:15px;padding:10px 24px;margin-top:10px;" onclick="runCompactFull()" ${S.networkOk?'':'disabled'}>🗜️ 全文一键精简</button>
+  <div id="cp-output"></div></div>`;
+  }else{
+    let sec=w[idx];
+    let before=(sec.word_count||0);
+    let after=Math.round(before*(1-ratio/100));
+    el.innerHTML+=`<div class="card">
+  <h3>📝 逐节精简</h3>
+  <div class="fr"><div class="fg"><label>章节</label><select id="cp-section" onchange="S._compactIdx=parseInt(this.value);save();renderPage('compact')">${w.map((s,i)=>`<option value="${i}" ${i===idx?'selected':''}>${i+1}. ${_esc(s.title)} (${(s.word_count||0).toLocaleString()}字)</option>`).join('')}</select></div></div>
+  <p>原文: <b>${before.toLocaleString()}</b>字 → 预计精简后: <b>~${after.toLocaleString()}</b>字</p>
+  <button id="cp-sec-btn" class="btn btn-primary" style="font-size:14px;padding:8px 20px;margin-top:8px;" onclick="runCompactSection()" ${S.networkOk?'':'disabled'}>🗜️ 精简本节</button>
+</div>
+<div class="fr" style="gap:12px;">
+  <div class="card" style="flex:1;"><h4>📄 原文</h4><div class="writing-content" style="max-height:50vh;">${_esc(sec.content||'')}</div></div>
+  <div class="card" style="flex:1;"><h4>📝 精简版</h4><div id="cp-preview" class="writing-content" style="max-height:50vh;color:var(--acc);">点击「精简本节」生成</div></div>
+</div>`;
+  }
+}
+
+async function runCompactFull(){
+  if(!S.apiKey||!S.networkOk){toast('请先设置API密钥','error');return}
+  let w=S.outline.filter(s=>s.content&&s.content.trim());
+  if(!w.length){toast('无已完成章节','error');return}
+  let ratio=S._compactRatio||20;
+  let sys=`你是学术编辑。请对论文全文进行精简，删除冗余表述、合并重复论点、简化过度修饰，保留核心论证和学术严谨性。目标减少约${ratio}%字数。规则: 1)不删[TABLE:xxx]/[CHART:xxx]/[IMAGE:xxx]/[FORMULA:N]标记 2)保留LaTeX公式 3)保留参考文献引用标记 4)输出完整的精简后全文。`;
+
+  let fullText=w.map(s=>`【${s.title}】\n${s.content}`).join('\n\n');
+  let btn=_id('cp-full-btn');btn.disabled=true;btn.textContent='精简中...';
+  let out=_id('cp-output');out.innerHTML='';
+
+  try{
+    let result='';let el=document.createElement('div');el.className='card writing-content';out.appendChild(el);
+    for await(let c of dsStream(sys,`请精简以下论文全文 (目标: 减少约${ratio}%，当前${fullText.length}字符):\n\n${fullText.slice(0,15000)}`)){
+      result+=c;el.textContent=result;
+    }
+    S._compactResult=result;save();
+    let before=fullText.length,after=result.length;
+    out.innerHTML+=`<p style="color:green;margin-top:8px;">✅ 精简完成! ${before.toLocaleString()}字 → ${after.toLocaleString()}字 (减少${Math.round((1-after/before)*100)}%)</p>
+    <button class="btn btn-success" onclick="applyCompactFull()">📥 应用精简结果 (替换所有章节)</button>`;
+  }catch(e){out.innerHTML+=`<p style="color:red;">❌ 失败: ${_esc(e.message)}</p>`}
+  btn.disabled=false;btn.textContent='🗜️ 全文一键精简';
+}
+
+function applyCompactFull(){
+  if(!S._compactResult)return;
+  // 按标题拆分精简结果
+  let w=S.outline.filter(s=>s.content&&s.content.trim());
+  let text=S._compactResult;
+  // 尝试按【标题】分割
+  for(let s of w){
+    let pattern=`【${s.title.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}】`;
+    let re=new RegExp(pattern+'[\\s\\S]*?(?=【|$)','g');
+    // 简单策略：将精简结果按章节比例分配
+  }
+  // 简单策略：用精简结果替换
+  let parts=text.split(/【[^】]+】\s*/).filter(p=>p.trim());
+  for(let i=0;i<Math.min(w.length,parts.length);i++){
+    w[i].content=parts[i].trim();w[i].word_count=parts[i].length;w[i].status='written';
+  }
+  S._compactResult=null;delete S._compactResult;save();
+  toast('✅ 精简结果已应用到所有章节','success');renderPage('compact');
+}
+
+async function runCompactSection(){
+  if(!S.apiKey||!S.networkOk){toast('请先设置API密钥','error');return}
+  let w=S.outline.filter(s=>s.content&&s.content.trim());
+  let idx=S._compactIdx||0;if(idx>=w.length)return;
+  let sec=w[idx],ratio=S._compactRatio||20;
+  let sys=`你是学术编辑。请精简以下论文章节，删除冗余表述、合并重复论点，保留核心论证和学术严谨性。目标减少约${ratio}%字数。规则: 不删[TABLE:xxx]/[CHART:xxx]/[IMAGE:xxx]/[FORMULA:N]标记，保留LaTeX公式$...$。`;
+
+  let btn=_id('cp-sec-btn');btn.disabled=true;btn.textContent='精简中...';
+  let prev=_id('cp-preview');prev.innerHTML='';
+
+  try{
+    let result='';
+    for await(let c of dsStream(sys,`请精简以下章节 (目标: 减少约${ratio}%，当前${sec.content.length}字符):\n\n${sec.content.slice(0,5000)}`)){
+      result+=c;prev.textContent=result;
+    }
+    S._compactTemp=result;save();
+    prev.innerHTML+=`\n\n<span style="color:green;">✅ 精简完成! ${sec.content.length.toLocaleString()}字 → ${result.length.toLocaleString()}字 (减少${Math.round((1-result.length/sec.content.length)*100)}%)</span>
+    <br><button class="btn btn-success btn-sm" onclick="applyCompactSection()" style="margin-top:6px;">📥 应用此精简结果</button>`;
+  }catch(e){prev.innerHTML=`<span style="color:red;">❌ 失败: ${_esc(e.message)}</span>`}
+  btn.disabled=false;btn.textContent='🗜️ 精简本节';
+}
+
+function applyCompactSection(){
+  if(!S._compactTemp)return;
+  let w=S.outline.filter(s=>s.content&&s.content.trim());
+  let idx=S._compactIdx||0;if(idx>=w.length)return;
+  w[idx].content=S._compactTemp;w[idx].word_count=S._compactTemp.length;w[idx].status='written';
+  S._compactTemp=null;delete S._compactTemp;save();
+  toast('✅ 精简结果已应用','success');renderPage('compact');
+}
+
 // ==================== 启动 ====================
 checkNet();renderSidebar();navigate(S.page||'home');
 </script>
